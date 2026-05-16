@@ -1,0 +1,67 @@
+{% extends 'banking/base.html' %}
+{% load static %}
+{% block title %}X Bank | 2FA Setup{% endblock %}
+{% block content %}
+<div class="container py-4"><div class="row justify-content-center"><div class="col-lg-7">
+<div class="card-bank">
+  <div class="card-header-bank"><i class="fas fa-shield-alt fa-2x mb-2"></i><h3>Two-Factor Authentication</h3><p class="mb-0 opacity-75">Add an extra security layer to your account</p></div>
+  <div class="p-4 p-md-5">
+
+    {% if user.two_factor_enabled %}
+    <div class="alert alert-success rounded-3 mb-4">
+      <i class="fas fa-check-circle me-2"></i><strong>2FA is currently ENABLED</strong>
+      {% if user.totp_secret %} — Using Google Authenticator (TOTP){% else %} — Using Email OTP{% endif %}
+    </div>
+    <div class="border border-danger rounded-3 p-4 mb-4">
+      <h6 class="text-danger fw-bold mb-3"><i class="fas fa-unlock me-2"></i>Disable 2FA</h6>
+      <p class="text-muted small mb-3">Enter your current OTP or authenticator code.</p>
+      <form method="post">{% csrf_token %}
+        <input type="hidden" name="action" value="disable_2fa">
+        <div class="input-group-bank mb-3"><i class="fas fa-key input-icon"></i>
+          <input type="text" name="otp_code" class="form-control form-control-bank" placeholder="6-digit code" maxlength="6" inputmode="numeric"></div>
+        <button type="submit" class="btn btn-danger w-100"><i class="fas fa-unlock me-2"></i>Disable 2FA</button>
+      </form>
+    </div>
+    {% endif %}
+
+    <h5 class="fw-bold mb-3"><i class="fas fa-mobile-alt me-2 text-success"></i>Option 1: Google Authenticator (Recommended)</h5>
+    <div class="row align-items-center g-4 mb-5">
+      <div class="col-md-5 text-center">
+        <div class="bg-white p-3 rounded-3 shadow-sm d-inline-block">
+          {% if qr_code %}
+          <img src="data:image/png;base64,{{ qr_code }}" alt="QR Code" style="width:180px;height:180px;">
+          {% else %}
+          <p class="text-muted small p-4">QR unavailable</p>
+          {% endif %}
+        </div>
+        <div class="mt-2 p-2 rounded-3" style="background:#f8f9fa;word-break:break-all;">
+          <small class="text-muted d-block">Manual key:</small>
+          <code class="small fw-bold text-dark">{{ totp_secret }}</code>
+        </div>
+      </div>
+      <div class="col-md-7">
+        <ol class="ps-3 mb-3">
+          <li class="mb-2">Install <strong>Google Authenticator</strong> or <strong>Authy</strong>.</li>
+          <li class="mb-2">Tap <strong>+</strong> and scan the QR code, or enter the key manually.</li>
+          <li class="mb-2">Enter the 6-digit code shown in the app to activate.</li>
+        </ol>
+        <form method="post">{% csrf_token %}
+          <input type="hidden" name="action" value="enable_totp">
+          <div class="input-group-bank mb-3"><i class="fas fa-key input-icon"></i>
+            <input type="text" name="token" class="form-control form-control-bank" placeholder="6-digit authenticator code" maxlength="6" inputmode="numeric" required></div>
+          <button type="submit" class="btn btn-primary-bank w-100"><i class="fas fa-shield-alt me-2"></i>Activate Authenticator 2FA</button>
+        </form>
+      </div>
+    </div>
+
+    <hr>
+    <h5 class="fw-bold mb-3 mt-4"><i class="fas fa-envelope me-2 text-info"></i>Option 2: Email OTP</h5>
+    <p class="text-muted small mb-3">Every login and transaction will send a 6-digit OTP to: <strong>{{ user.email }}</strong></p>
+    <form method="post">{% csrf_token %}
+      <input type="hidden" name="action" value="enable_email">
+      <button type="submit" class="btn btn-outline-info w-100"><i class="fas fa-envelope me-2"></i>Enable Email OTP 2FA</button>
+    </form>
+  </div>
+</div>
+</div></div></div>
+{% endblock %}

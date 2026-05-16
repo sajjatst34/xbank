@@ -1,0 +1,172 @@
+{% extends 'admin_panel/base.html' %}
+{% load humanize %}
+{% block title %}Loan Review — X Bank Admin{% endblock %}
+{% block page_title %}Loan Application{% endblock %}
+{% block page_subtitle %}{{ loan.user.get_full_name|default:loan.user.username }} — {{ loan.get_loan_type_display }}{% endblock %}
+
+{% block content %}
+<div class="breadcrumb-admin">
+  <a href="{% url 'admin_panel:loans' %}">Loans</a>
+  <i class="fas fa-chevron-right" style="font-size:0.6rem;"></i>
+  <span>{{ loan.application_id|stringformat:"s"|truncatechars:10 }}</span>
+</div>
+
+<div class="row g-3">
+  <div class="col-lg-7">
+    <div class="panel-card mb-3">
+      <div class="panel-card-header">
+        <span class="panel-card-title"><i class="fas fa-file-alt me-2 text-warning"></i>Application Details</span>
+        <span class="badge-admin
+          {% if loan.status == 'APPROVED' or loan.status == 'DISBURSED' %}badge-approved
+          {% elif loan.status == 'REJECTED' %}badge-rejected
+          {% elif loan.status == 'SUBMITTED' %}badge-pending
+          {% else %}badge-inactive{% endif %}">{{ loan.get_status_display }}</span>
+      </div>
+      <div class="panel-card-body">
+        <div class="row g-2" style="font-size:0.85rem;">
+          <div class="col-sm-6">
+            <div class="p-3" style="background:#f8fafa;border-radius:10px;">
+              <div style="color:#6c8c88;font-size:0.75rem;margin-bottom:4px;">Applicant</div>
+              <div class="fw-semibold"><a href="{% url 'admin_panel:user_detail' loan.user.id %}" style="color:var(--primary-light);">{{ loan.user.get_full_name|default:loan.user.username }}</a></div>
+              <div style="color:#6c8c88;font-size:0.78rem;">{{ loan.user.email }}</div>
+            </div>
+          </div>
+          <div class="col-sm-6">
+            <div class="p-3" style="background:#f8fafa;border-radius:10px;">
+              <div style="color:#6c8c88;font-size:0.75rem;margin-bottom:4px;">Requested Amount</div>
+              <div class="fw-bold" style="font-size:1.2rem;color:var(--primary);">৳{{ loan.requested_amount|floatformat:2|intcomma }}</div>
+            </div>
+          </div>
+          <div class="col-sm-6">
+            <div class="p-3" style="background:#f8fafa;border-radius:10px;">
+              <div style="color:#6c8c88;font-size:0.75rem;margin-bottom:4px;">Loan Type</div>
+              <div class="fw-semibold">{{ loan.get_loan_type_display }}</div>
+            </div>
+          </div>
+          <div class="col-sm-6">
+            <div class="p-3" style="background:#f8fafa;border-radius:10px;">
+              <div style="color:#6c8c88;font-size:0.75rem;margin-bottom:4px;">Tenure</div>
+              <div class="fw-semibold">{{ loan.tenure_months }} Months</div>
+            </div>
+          </div>
+          <div class="col-sm-6">
+            <div class="p-3" style="background:#f8fafa;border-radius:10px;">
+              <div style="color:#6c8c88;font-size:0.75rem;margin-bottom:4px;">Interest Rate</div>
+              <div class="fw-semibold">{{ loan.interest_rate }}% p.a.</div>
+            </div>
+          </div>
+          <div class="col-sm-6">
+            <div class="p-3" style="background:#f8fafa;border-radius:10px;">
+              <div style="color:#6c8c88;font-size:0.75rem;margin-bottom:4px;">Employment Type</div>
+              <div class="fw-semibold">{{ loan.employment_type|default:"—" }}</div>
+            </div>
+          </div>
+          <div class="col-sm-6">
+            <div class="p-3" style="background:#f8fafa;border-radius:10px;">
+              <div style="color:#6c8c88;font-size:0.75rem;margin-bottom:4px;">Monthly Income</div>
+              <div class="fw-semibold">{% if loan.monthly_income %}৳{{ loan.monthly_income|floatformat:0|intcomma }}{% else %}—{% endif %}</div>
+            </div>
+          </div>
+          <div class="col-sm-6">
+            <div class="p-3" style="background:#f8fafa;border-radius:10px;">
+              <div style="color:#6c8c88;font-size:0.75rem;margin-bottom:4px;">Applied Date</div>
+              <div class="fw-semibold">{{ loan.applied_at|date:"d M Y H:i" }}</div>
+            </div>
+          </div>
+          {% if loan.approved_amount %}
+          <div class="col-sm-6">
+            <div class="p-3" style="background:rgba(39,174,96,0.08);border-radius:10px;">
+              <div style="color:#6c8c88;font-size:0.75rem;margin-bottom:4px;">Approved Amount</div>
+              <div class="fw-bold" style="color:#27ae60;">৳{{ loan.approved_amount|floatformat:2|intcomma }}</div>
+            </div>
+          </div>
+          {% endif %}
+          {% if loan.monthly_installment %}
+          <div class="col-sm-6">
+            <div class="p-3" style="background:rgba(41,128,185,0.08);border-radius:10px;">
+              <div style="color:#6c8c88;font-size:0.75rem;margin-bottom:4px;">Monthly EMI</div>
+              <div class="fw-bold" style="color:#2980b9;">৳{{ loan.monthly_installment|floatformat:2|intcomma }}</div>
+            </div>
+          </div>
+          {% endif %}
+        </div>
+        {% if loan.purpose %}
+        <div class="mt-3" style="font-size:0.85rem;">
+          <div style="color:#6c8c88;margin-bottom:4px;">Loan Purpose</div>
+          <div class="p-3" style="background:#f8fafa;border-radius:10px;">{{ loan.purpose }}</div>
+        </div>
+        {% endif %}
+        {% if loan.collateral %}
+        <div class="mt-3" style="font-size:0.85rem;">
+          <div style="color:#6c8c88;margin-bottom:4px;">Collateral</div>
+          <div class="p-3" style="background:#f8fafa;border-radius:10px;">{{ loan.collateral }}</div>
+        </div>
+        {% endif %}
+        {% if loan.rejection_reason %}
+        <div class="mt-3" style="font-size:0.85rem;">
+          <div style="color:#e74c3c;margin-bottom:4px;">Rejection Reason</div>
+          <div class="p-3" style="background:rgba(231,76,60,0.08);border-radius:10px;color:#e74c3c;">{{ loan.rejection_reason }}</div>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-5">
+    <div class="panel-card">
+      <div class="panel-card-header">
+        <span class="panel-card-title"><i class="fas fa-gavel me-2 text-warning"></i>Decision</span>
+      </div>
+      <div class="panel-card-body">
+        {% if loan.status == 'SUBMITTED' or loan.status == 'UNDER_REVIEW' %}
+        <!-- Approve -->
+        <form method="post" class="form-admin mb-3" onsubmit="return confirm('Approve this loan application?')">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="approve">
+          <div class="mb-2">
+            <label class="form-label">Approved Amount (BDT)</label>
+            <input type="number" name="approved_amount" class="form-control" value="{{ loan.requested_amount }}" step="0.01" required>
+          </div>
+          <button type="submit" class="btn-admin-success w-100"><i class="fas fa-check"></i> Approve Loan</button>
+        </form>
+        <hr style="border-color:#f0f4f3;">
+        <!-- Reject -->
+        <form method="post" class="form-admin" onsubmit="return confirm('Reject this loan application?')">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="reject">
+          <div class="mb-2">
+            <label class="form-label">Rejection Reason</label>
+            <textarea name="rejection_reason" class="form-control" rows="3" placeholder="Reason for rejection…"></textarea>
+          </div>
+          <button type="submit" class="btn-admin-danger w-100"><i class="fas fa-times"></i> Reject Application</button>
+        </form>
+
+        {% elif loan.status == 'APPROVED' %}
+        <div class="alert-admin alert alert-success mb-3" style="font-size:0.85rem;">
+          <i class="fas fa-check-circle me-2"></i>Loan approved for <strong>৳{{ loan.approved_amount|floatformat:2|intcomma }}</strong>. Ready for disbursement.
+        </div>
+        <form method="post" onsubmit="return confirm('Disburse ৳{{ loan.approved_amount }} to account {{ loan.account.account_number }}?')">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="disburse">
+          <button type="submit" class="btn-admin-accent w-100"><i class="fas fa-paper-plane"></i> Disburse Funds</button>
+        </form>
+
+        {% elif loan.status == 'DISBURSED' %}
+        <div class="alert-admin alert alert-success mb-3" style="font-size:0.85rem;">
+          <i class="fas fa-check-circle me-2"></i>Funds disbursed on {{ loan.disbursed_at|date:"d M Y" }}.
+        </div>
+        <form method="post" onsubmit="return confirm('Close this loan?')">
+          {% csrf_token %}<input type="hidden" name="action" value="close">
+          <button type="submit" class="btn-admin-danger w-100"><i class="fas fa-times-circle"></i> Close Loan</button>
+        </form>
+
+        {% else %}
+        <div class="text-center text-muted py-4" style="font-size:0.85rem;">
+          <i class="fas fa-info-circle me-2"></i>No actions available for <strong>{{ loan.get_status_display }}</strong> status.
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

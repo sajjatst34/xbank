@@ -1,0 +1,97 @@
+XBank Django Project Deployment Guide (Railway + MySQL)
+
+STEP 1: Install Required Software
+---------------------------------
+1. Install Git
+2. Install Python 3.13 or 3.14
+3. Install Railway CLI
+
+Railway CLI install command:
+npm i -g @railway/cli
+
+STEP 2: Extract Project
+-----------------------
+Extract the ZIP file.
+
+Open terminal inside project folder.
+
+STEP 3: Create Virtual Environment
+----------------------------------
+Windows:
+python -m venv venv
+
+Activate:
+venv\Scripts\activate
+
+STEP 4: Install Requirements
+----------------------------
+pip install -r requirements.txt
+
+STEP 5: Run Project Locally
+---------------------------
+Run migrations:
+python manage.py migrate
+
+Create superuser:
+python manage.py createsuperuser
+
+Run server:
+python manage.py runserver
+
+STEP 6: Push Project to GitHub
+------------------------------
+git init
+git add .
+git commit -m "Initial commit"
+
+Create a GitHub repository and run:
+git remote add origin YOUR_GITHUB_REPO_LINK
+git push -u origin main
+
+STEP 7: Deploy on Railway
+-------------------------
+1. Go to https://railway.app
+2. Login with GitHub
+3. Click 'New Project'
+4. Select 'Deploy from GitHub Repo'
+5. Choose your repository
+
+STEP 8: Add MySQL Database
+--------------------------
+1. Inside Railway project
+2. Click 'New'
+3. Select 'Database'
+4. Select 'MySQL'
+
+Railway automatically creates MYSQL_URL.
+
+STEP 9: Add Environment Variables
+---------------------------------
+Open Variables tab and add:
+
+SECRET_KEY=your-secret-key
+DEBUG=False
+ALLOWED_HOSTS=.railway.app
+
+STEP 10: Deploy Commands
+------------------------
+Railway automatically reads:
+
+Procfile
+requirements.txt
+runtime.txt
+
+STEP 11: Run Migrations on Railway
+----------------------------------
+Open Railway terminal and run:
+
+python manage.py migrate
+
+Create admin:
+python manage.py createsuperuser
+
+STEP 12: Open Live Website
+--------------------------
+Click generated Railway domain.
+
+Your project is now live.

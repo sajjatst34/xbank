@@ -1,0 +1,28 @@
+{% extends 'banking/base.html' %}
+{% block title %}X Bank | Verify OTP{% endblock %}
+{% block content %}
+<div class="d-flex align-items-center justify-content-center" style="min-height:85vh;padding:1.5rem;">
+  <div style="width:100%;max-width:420px;">
+    <div class="card-bank-dark p-4 p-md-5 text-center">
+      <div class="mb-4">
+        <div style="width:80px;height:80px;background:linear-gradient(135deg,#17a2b8,#138496);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;">
+          <i class="fas fa-envelope-open fa-2x text-white"></i>
+        </div>
+        <h4 class="text-white fw-bold">{{ purpose }}</h4>
+        <p class="text-white-50 small">OTP sent to <strong class="text-white">{{ masked_contact }}</strong></p>
+      </div>
+      <form method="post">{% csrf_token %}
+        <input type="text" name="otp_code"
+               class="form-control text-center fw-bold fs-2 mb-3"
+               style="letter-spacing:14px;border-radius:1rem;background:rgba(255,255,255,.1);border:2px solid rgba(23,162,184,.4);color:white;padding:1rem;"
+               placeholder="000000" maxlength="6" inputmode="numeric" autocomplete="off" autofocus required>
+        <button type="submit" class="btn btn-primary-bank w-100 mb-3"><i class="fas fa-check-circle me-2"></i>Verify</button>
+      </form>
+      <a href="{{ resend_url }}" class="text-warning text-decoration-none small"><i class="fas fa-redo me-1"></i>Resend OTP</a>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>document.querySelector('[name="otp_code"]').addEventListener('input',function(){this.value=this.value.replace(/\D/g,'').slice(0,6);});</script>
+{% endblock %}

@@ -1,0 +1,93 @@
+{% extends 'admin_panel/base.html' %}
+{% load humanize %}
+{% block title %}Cards — X Bank Admin{% endblock %}
+{% block page_title %}Cards{% endblock %}
+{% block page_subtitle %}Manage all debit and credit cards{% endblock %}
+
+{% block content %}
+<div class="panel-card">
+  <div class="panel-card-header">
+    <span class="panel-card-title"><i class="fas fa-credit-card me-2 text-warning"></i>All Cards ({{ page_obj.paginator.count }})</span>
+  </div>
+  <div class="panel-card-body">
+    <form method="get" class="filter-bar mb-0">
+      <div class="search-bar" style="flex:1;min-width:200px;">
+        <i class="fas fa-search search-icon"></i>
+        <input type="text" name="q" value="{{ q }}" placeholder="Cardholder name, account number…">
+      </div>
+      <select name="status" class="filter-select">
+        <option value="">All Status</option>
+        {% for val, label in card_statuses %}
+        <option value="{{ val }}" {% if status_f == val %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+      <button type="submit" class="btn-admin-primary"><i class="fas fa-filter"></i> Filter</button>
+      <a href="{% url 'admin_panel:cards' %}" class="btn-admin-primary" style="background:linear-gradient(95deg,#6c757d,#555);">Clear</a>
+    </form>
+  </div>
+  <div style="overflow-x:auto;">
+    <table class="admin-table">
+      <thead>
+        <tr><th>Card Number</th><th>Cardholder</th><th>Account</th><th>Type</th><th>Network</th><th>Expiry</th><th>Status</th><th>Action</th></tr>
+      </thead>
+      <tbody>
+        {% for card in page_obj %}
+        <tr>
+          <td style="font-family:monospace;font-size:0.85rem;letter-spacing:1px;">{{ card.masked_number }}</td>
+          <td>
+            <div style="font-weight:600;font-size:0.85rem;">{{ card.cardholder_name }}</div>
+            <div style="font-size:0.75rem;color:#6c8c88;">{{ card.account.user.email }}</div>
+          </td>
+          <td style="font-family:monospace;font-size:0.82rem;">{{ card.account.account_number }}</td>
+          <td>
+            <span style="font-size:0.78rem;color:{% if card.card_type == 'CREDIT' %}#8e44ad{% else %}#2980b9{% endif %};font-weight:600;">
+              {{ card.get_card_type_display }}
+            </span>
+          </td>
+          <td style="font-size:0.82rem;">{{ card.get_network_display }}</td>
+          <td style="font-family:monospace;font-size:0.82rem;">{{ card.expiry_display }}</td>
+          <td>
+            <span class="badge-admin
+              {% if card.status == 'ACTIVE' %}badge-active
+              {% elif card.status == 'BLOCKED' %}badge-rejected
+              {% else %}badge-inactive{% endif %}">
+              {{ card.get_status_display }}
+            </span>
+          </td>
+          <td>
+            <form method="post" style="display:inline;">
+              {% csrf_token %}
+              <input type="hidden" name="card_id" value="{{ card.id }}">
+              {% if card.status == 'ACTIVE' %}
+                <input type="hidden" name="action" value="block">
+                <button type="submit" class="btn-admin-danger btn-admin-sm" onclick="return confirm('Block this card?')">
+                  <i class="fas fa-ban"></i> Block
+                </button>
+              {% else %}
+                <input type="hidden" name="action" value="activate">
+                <button type="submit" class="btn-admin-success btn-admin-sm" onclick="return confirm('Activate this card?')">
+                  <i class="fas fa-check"></i> Activate
+                </button>
+              {% endif %}
+            </form>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="8" class="text-center py-5 text-muted">
+            <i class="fas fa-credit-card fa-2x mb-2 d-block opacity-25"></i>No cards found
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% if page_obj.has_other_pages %}
+  <div class="panel-card-body d-flex justify-content-center gap-2 pt-3" style="border-top:1px solid #f0f4f3;">
+    {% if page_obj.has_previous %}<a href="?page={{ page_obj.previous_page_number }}&q={{ q }}&status={{ status_f }}" class="btn-admin-primary btn-admin-sm">« Prev</a>{% endif %}
+    <span style="padding:0.3rem 0.8rem;font-size:0.82rem;color:#6c8c88;">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+    {% if page_obj.has_next %}<a href="?page={{ page_obj.next_page_number }}&q={{ q }}&status={{ status_f }}" class="btn-admin-primary btn-admin-sm">Next »</a>{% endif %}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

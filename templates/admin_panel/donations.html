@@ -1,0 +1,63 @@
+{% extends 'admin_panel/base.html' %}
+{% load humanize %}
+{% block title %}Donations — X Bank Admin{% endblock %}
+{% block page_title %}Donations{% endblock %}
+{% block page_subtitle %}Total donated: ৳{{ total|floatformat:2|intcomma }}{% endblock %}
+
+{% block content %}
+<div class="panel-card">
+  <div class="panel-card-header">
+    <span class="panel-card-title"><i class="fas fa-heart me-2 text-warning"></i>All Donations ({{ page_obj.paginator.count }})</span>
+  </div>
+  <div style="overflow-x:auto;">
+    <table class="admin-table">
+      <thead>
+        <tr><th>Organization</th><th>Type</th><th>Donor / Account</th><th>Amount</th><th>Anonymous</th><th>Message</th><th>Date</th></tr>
+      </thead>
+      <tbody>
+        {% for d in page_obj %}
+        <tr>
+          <td>
+            <div style="font-weight:600;font-size:0.875rem;">{{ d.organization_name }}</div>
+          </td>
+          <td style="font-size:0.82rem;color:#6c8c88;">{{ d.organization_type|default:"—" }}</td>
+          <td>
+            {% if d.is_anonymous %}
+              <span style="font-size:0.82rem;color:#6c8c88;font-style:italic;">Anonymous</span>
+            {% else %}
+              <div style="font-size:0.83rem;font-weight:600;">{{ d.account.user.get_full_name|default:d.account.user.username }}</div>
+              <div style="font-size:0.73rem;color:#6c8c88;">{{ d.account.account_number }}</div>
+            {% endif %}
+          </td>
+          <td class="fw-bold" style="color:#27ae60;">৳{{ d.amount|floatformat:2|intcomma }}</td>
+          <td>
+            {% if d.is_anonymous %}
+              <span class="badge-admin badge-pending">Yes</span>
+            {% else %}
+              <span class="badge-admin badge-inactive">No</span>
+            {% endif %}
+          </td>
+          <td style="font-size:0.78rem;color:#6c8c88;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+            {{ d.message|default:"—"|truncatechars:40 }}
+          </td>
+          <td style="font-size:0.78rem;color:#6c8c88;">{{ d.donated_at|date:"d M Y H:i" }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="7" class="text-center py-5 text-muted">
+            <i class="fas fa-heart fa-2x mb-2 d-block opacity-25"></i>No donations found
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% if page_obj.has_other_pages %}
+  <div class="panel-card-body d-flex justify-content-center gap-2 pt-3" style="border-top:1px solid #f0f4f3;">
+    {% if page_obj.has_previous %}<a href="?page={{ page_obj.previous_page_number }}" class="btn-admin-primary btn-admin-sm">« Prev</a>{% endif %}
+    <span style="padding:0.3rem 0.8rem;font-size:0.82rem;color:#6c8c88;">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+    {% if page_obj.has_next %}<a href="?page={{ page_obj.next_page_number }}" class="btn-admin-primary btn-admin-sm">Next »</a>{% endif %}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

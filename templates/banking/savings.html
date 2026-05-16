@@ -1,0 +1,78 @@
+{% extends 'banking/base.html' %}
+{% load humanize %}
+{% block title %}X Bank | Savings Plans{% endblock %}
+{% block content %}
+<div class="container py-4"><div class="row g-4">
+<div class="col-lg-7"><div class="card-bank">
+  <div class="card-header-bank"><i class="fas fa-piggy-bank fa-2x mb-2"></i><h3>Savings Plans</h3><p class="mb-0 opacity-75">Grow your wealth with competitive returns</p></div>
+  <div class="p-4 p-md-5">
+    <div class="row g-3 mb-4">
+      <div class="col-4 text-center p-3 rounded-3" style="background:#e8f5e9;border:1.5px solid #81c784;"><div class="fw-bold text-success fs-5">7.50%</div><div class="small text-muted">Fixed Deposit</div></div>
+      <div class="col-4 text-center p-3 rounded-3" style="background:#e3f2fd;border:1.5px solid #64b5f6;"><div class="fw-bold text-primary fs-5">6.50%</div><div class="small text-muted">Recurring</div></div>
+      <div class="col-4 text-center p-3 rounded-3" style="background:#fff8e1;border:1.5px solid #ffca28;"><div class="fw-bold text-warning fs-5">8.00%</div><div class="small text-muted">DPS</div></div>
+    </div>
+    <form method="post" novalidate>{% csrf_token %}
+      <div class="mb-4"><label class="form-label fw-semibold">Plan Type</label>
+        <div class="input-group-bank"><i class="fas fa-tag input-icon"></i>
+          <select name="plan_type" class="form-control form-control-bank" id="planType" required>
+            <option value="FD">Fixed Deposit — 7.50% p.a.</option>
+            <option value="RD">Recurring Deposit — 6.50% p.a.</option>
+            <option value="DPS">Deposit Pension Scheme — 8.00% p.a.</option>
+          </select></div></div>
+      <div class="mb-4"><label class="form-label fw-semibold">Investment Amount (BDT)</label>
+        <div class="input-group-bank"><i class="fas fa-coins input-icon"></i>
+          <input type="number" name="principal_amount" id="planAmt" class="form-control form-control-bank" placeholder="Min ৳1,000" min="1000" step="100" required></div></div>
+      <div class="mb-4"><label class="form-label fw-semibold">Duration (months)</label>
+        <div class="input-group-bank"><i class="fas fa-calendar-alt input-icon"></i>
+          <input type="number" name="tenure_months" id="planTen" class="form-control form-control-bank" placeholder="1 to 120 months" min="1" max="120" required></div></div>
+      <div class="p-3 rounded-3 mb-4 text-center" style="background:#f0fff4;border:1.5px solid #27ae60;">
+        <div id="matResult" class="text-muted small">Enter amount and duration to see returns</div>
+      </div>
+      <div class="form-check mb-4">
+        <input type="checkbox" name="auto_renew" class="form-check-input" id="autoRenew">
+        <label class="form-check-label" for="autoRenew">Auto-renew on maturity</label>
+      </div>
+      <div class="alert alert-info rounded-3 mb-4 small"><i class="fas fa-info-circle me-2"></i>Amount will be deducted from your primary account and locked until maturity.</div>
+      <button type="submit" class="btn btn-primary-bank w-100"><i class="fas fa-piggy-bank me-2"></i>Open Plan</button>
+    </form>
+  </div></div></div>
+
+<div class="col-lg-5">
+  <div class="card-bank p-4">
+    <h6 class="fw-bold mb-3"><i class="fas fa-list me-2 text-success"></i>My Plans</h6>
+    {% if plans %}{% for p in plans %}
+    <div class="border rounded-3 p-3 mb-2">
+      <div class="d-flex justify-content-between align-items-start">
+        <div><span class="badge bg-primary small">{{ p.plan_type }}</span>
+          <p class="mb-0 fw-bold mt-1">৳{{ p.principal_amount|floatformat:0|intcomma }}</p>
+          <small class="text-muted">{{ p.interest_rate }}% p.a. · Matures {{ p.maturity_date|date:"d M Y" }}</small>
+          {% if p.maturity_amount %}<br><small class="text-success">Maturity: ৳{{ p.maturity_amount|floatformat:0|intcomma }}</small>{% endif %}
+        </div>
+        <span class="badge {% if p.status == 'ACTIVE' %}bg-success{% else %}bg-secondary{% endif %}">{{ p.status }}</span>
+      </div></div>
+    {% endfor %}{% else %}
+    <p class="text-muted text-center small py-3">No savings plans yet.</p>{% endif %}
+  </div>
+</div>
+</div></div>
+{% endblock %}
+{% block extra_js %}
+<script>
+const planRates = {FD:7.5,RD:6.5,DPS:8.0};
+function calcMat() {
+  const a = parseFloat(document.getElementById('planAmt').value)||0;
+  const n = parseInt(document.getElementById('planTen').value)||0;
+  const r = planRates[document.getElementById('planType').value]||7.5;
+  const el = document.getElementById('matResult');
+  if (a>0 && n>0) {
+    const mat = a*(1+r/100*n/12);
+    const interest = mat-a;
+    el.innerHTML = '<strong class="text-success fs-6">Maturity: ৳'+mat.toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2})+'</strong><br><small class="text-muted">Interest earned: ৳'+interest.toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2})+'</small>';
+  } else { el.textContent = 'Enter amount and duration to see returns'; }
+}
+['planAmt','planTen','planType'].forEach(id=>{
+  const el=document.getElementById(id);
+  el.addEventListener(el.tagName==='SELECT'?'change':'input',calcMat);
+});
+</script>
+{% endblock %}

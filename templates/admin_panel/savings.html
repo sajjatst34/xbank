@@ -1,0 +1,81 @@
+{% extends 'admin_panel/base.html' %}
+{% load humanize %}
+{% block title %}Savings Plans — X Bank Admin{% endblock %}
+{% block page_title %}Savings Plans{% endblock %}
+{% block page_subtitle %}Total invested: ৳{{ total_invested|floatformat:2|intcomma }}{% endblock %}
+
+{% block content %}
+<div class="panel-card">
+  <div class="panel-card-header">
+    <span class="panel-card-title"><i class="fas fa-piggy-bank me-2 text-warning"></i>All Savings Plans ({{ page_obj.paginator.count }})</span>
+  </div>
+  <div class="panel-card-body">
+    <form method="get" class="filter-bar mb-0">
+      <select name="status" class="filter-select">
+        <option value="">All Status</option>
+        {% for val, label in plan_statuses %}
+        <option value="{{ val }}" {% if status_f == val %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+      <select name="type" class="filter-select">
+        <option value="">All Types</option>
+        {% for val, label in plan_types %}
+        <option value="{{ val }}" {% if type_f == val %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+      <button type="submit" class="btn-admin-primary"><i class="fas fa-filter"></i> Filter</button>
+      <a href="{% url 'admin_panel:savings' %}" class="btn-admin-primary" style="background:linear-gradient(95deg,#6c757d,#555);">Clear</a>
+    </form>
+  </div>
+  <div style="overflow-x:auto;">
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>Plan ID</th><th>Account / Owner</th><th>Type</th><th>Principal</th>
+          <th>Rate</th><th>Tenure</th><th>Maturity Date</th><th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for plan in page_obj %}
+        <tr>
+          <td style="font-family:monospace;font-size:0.78rem;color:#6c8c88;">{{ plan.plan_id|stringformat:"s"|truncatechars:10 }}</td>
+          <td>
+            <div style="font-weight:600;font-size:0.85rem;">{{ plan.account.account_number }}</div>
+            <div style="font-size:0.75rem;color:#6c8c88;">{{ plan.account.user.get_full_name|default:plan.account.user.username }}</div>
+          </td>
+          <td>
+            <span style="font-size:0.82rem;font-weight:600;color:#8e44ad;">{{ plan.get_plan_type_display }}</span>
+          </td>
+          <td class="fw-semibold" style="color:var(--primary);">৳{{ plan.principal_amount|floatformat:2|intcomma }}</td>
+          <td style="font-size:0.83rem;">{{ plan.interest_rate }}%</td>
+          <td style="font-size:0.83rem;">{{ plan.tenure_months }} mo</td>
+          <td style="font-size:0.78rem;color:#6c8c88;">{{ plan.maturity_date|date:"d M Y" }}</td>
+          <td>
+            <span class="badge-admin
+              {% if plan.status == 'ACTIVE' %}badge-active
+              {% elif plan.status == 'MATURED' %}badge-completed
+              {% elif plan.status == 'WITHDRAWN' %}badge-pending
+              {% else %}badge-inactive{% endif %}">
+              {{ plan.get_status_display }}
+            </span>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="8" class="text-center py-5 text-muted">
+            <i class="fas fa-piggy-bank fa-2x mb-2 d-block opacity-25"></i>No savings plans found
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% if page_obj.has_other_pages %}
+  <div class="panel-card-body d-flex justify-content-center gap-2 pt-3" style="border-top:1px solid #f0f4f3;">
+    {% if page_obj.has_previous %}<a href="?page={{ page_obj.previous_page_number }}&status={{ status_f }}&type={{ type_f }}" class="btn-admin-primary btn-admin-sm">« Prev</a>{% endif %}
+    <span style="padding:0.3rem 0.8rem;font-size:0.82rem;color:#6c8c88;">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+    {% if page_obj.has_next %}<a href="?page={{ page_obj.next_page_number }}&status={{ status_f }}&type={{ type_f }}" class="btn-admin-primary btn-admin-sm">Next »</a>{% endif %}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

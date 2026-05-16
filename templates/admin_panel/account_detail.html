@@ -1,0 +1,112 @@
+{% extends 'admin_panel/base.html' %}
+{% load humanize %}
+{% block title %}Account {{ acc.account_number }} — X Bank Admin{% endblock %}
+{% block page_title %}Account Detail{% endblock %}
+{% block page_subtitle %}{{ acc.account_number }}{% endblock %}
+
+{% block content %}
+<div class="breadcrumb-admin">
+  <a href="{% url 'admin_panel:accounts' %}">Accounts</a>
+  <i class="fas fa-chevron-right" style="font-size:0.6rem;"></i>
+  <span>{{ acc.account_number }}</span>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-lg-4">
+    <div class="panel-card">
+      <div class="panel-card-body">
+        <h6 class="fw-bold mb-3" style="color:var(--primary);">Account Info</h6>
+        <div class="d-flex justify-content-between py-2" style="font-size:0.85rem;border-bottom:1px solid #f0f4f3;"><span style="color:#6c8c88;">Account #</span><span class="fw-semibold font-monospace">{{ acc.account_number }}</span></div>
+        <div class="d-flex justify-content-between py-2" style="font-size:0.85rem;border-bottom:1px solid #f0f4f3;"><span style="color:#6c8c88;">Owner</span><span><a href="{% url 'admin_panel:user_detail' acc.user.id %}" style="color:var(--primary-light);">{{ acc.user.get_full_name|default:acc.user.username }}</a></span></div>
+        <div class="d-flex justify-content-between py-2" style="font-size:0.85rem;border-bottom:1px solid #f0f4f3;"><span style="color:#6c8c88;">Type</span><span>{{ acc.get_account_type_display }}</span></div>
+        <div class="d-flex justify-content-between py-2" style="font-size:0.85rem;border-bottom:1px solid #f0f4f3;"><span style="color:#6c8c88;">Currency</span><span>{{ acc.currency }}</span></div>
+        <div class="d-flex justify-content-between py-2" style="font-size:0.85rem;border-bottom:1px solid #f0f4f3;"><span style="color:#6c8c88;">Interest Rate</span><span>{{ acc.interest_rate }}%</span></div>
+        <div class="d-flex justify-content-between py-2" style="font-size:0.85rem;border-bottom:1px solid #f0f4f3;"><span style="color:#6c8c88;">Status</span><span class="badge-admin badge-{{ acc.status|lower }}">{{ acc.get_status_display }}</span></div>
+        <div class="d-flex justify-content-between py-2" style="font-size:0.85rem;border-bottom:1px solid #f0f4f3;"><span style="color:#6c8c88;">Primary</span><span>{% if acc.is_primary %}Yes{% else %}No{% endif %}</span></div>
+        <div class="d-flex justify-content-between py-2" style="font-size:1rem;"><span style="color:#6c8c88;font-size:0.85rem;">Balance</span><span class="fw-bold" style="color:#27ae60;font-size:1.1rem;">৳{{ acc.balance|floatformat:2|intcomma }}</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-8">
+    <!-- Status Actions -->
+    <div class="panel-card mb-3">
+      <div class="panel-card-header">
+        <span class="panel-card-title"><i class="fas fa-tools me-2 text-warning"></i>Account Actions</span>
+      </div>
+      <div class="panel-card-body d-flex flex-wrap gap-2">
+        {% if acc.status != 'ACTIVE' %}
+        <form method="post">{% csrf_token %}<input type="hidden" name="action" value="activate">
+          <button type="submit" class="btn-admin-success"><i class="fas fa-check-circle"></i> Activate</button>
+        </form>
+        {% endif %}
+        {% if acc.status == 'ACTIVE' %}
+        <form method="post" onsubmit="return confirm('Freeze this account?')">{% csrf_token %}<input type="hidden" name="action" value="freeze">
+          <button type="submit" class="btn-admin-danger"><i class="fas fa-snowflake"></i> Freeze Account</button>
+        </form>
+        {% endif %}
+        {% if acc.status != 'CLOSED' %}
+        <form method="post" onsubmit="return confirm('Close this account permanently?')">{% csrf_token %}<input type="hidden" name="action" value="close">
+          <button type="submit" class="btn-admin-danger"><i class="fas fa-times-circle"></i> Close Account</button>
+        </form>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Balance Adjustment -->
+    <div class="panel-card">
+      <div class="panel-card-header">
+        <span class="panel-card-title"><i class="fas fa-balance-scale me-2 text-warning"></i>Balance Adjustment</span>
+      </div>
+      <div class="panel-card-body">
+        <form method="post" class="form-admin" onsubmit="return confirm('Adjust balance to entered amount?')">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="adjust_balance">
+          <div class="row g-3">
+            <div class="col-sm-5">
+              <label class="form-label">New Balance (BDT)</label>
+              <input type="number" name="new_balance" class="form-control" step="0.01" value="{{ acc.balance }}" required>
+            </div>
+            <div class="col-sm-5">
+              <label class="form-label">Reason</label>
+              <input type="text" name="reason" class="form-control" placeholder="Admin correction / audit…">
+            </div>
+            <div class="col-sm-2 d-flex align-items-end">
+              <button type="submit" class="btn-admin-accent w-100"><i class="fas fa-save"></i> Apply</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Transactions -->
+<div class="panel-card">
+  <div class="panel-card-header">
+    <span class="panel-card-title"><i class="fas fa-exchange-alt me-2 text-warning"></i>Recent Transactions</span>
+    <a href="{% url 'admin_panel:transactions' %}?q={{ acc.account_number }}" class="btn-admin-primary btn-admin-sm">View All</a>
+  </div>
+  <div style="overflow-x:auto;">
+    <table class="admin-table">
+      <thead><tr><th>Reference</th><th>Type</th><th>Amount</th><th>Balance After</th><th>Status</th><th>Date</th></tr></thead>
+      <tbody>
+        {% for txn in transactions %}
+        <tr>
+          <td style="font-family:monospace;font-size:0.78rem;color:#6c8c88;">{{ txn.reference_number }}</td>
+          <td style="font-size:0.82rem;">{{ txn.get_transaction_type_display }}</td>
+          <td class="fw-semibold" style="color:{% if txn.transaction_type in 'DEPOSIT,TRANSFER_IN,INTEREST,LOAN_DISBURSEMENT' %}#27ae60{% else %}#e74c3c{% endif %};">
+            {% if txn.transaction_type in 'DEPOSIT,TRANSFER_IN,INTEREST,LOAN_DISBURSEMENT' %}+{% else %}–{% endif %}৳{{ txn.amount|floatformat:2|intcomma }}
+          </td>
+          <td style="font-size:0.83rem;">৳{{ txn.balance_after|floatformat:2|intcomma }}</td>
+          <td><span class="badge-admin badge-{{ txn.status|lower }}">{{ txn.get_status_display }}</span></td>
+          <td style="font-size:0.78rem;color:#6c8c88;">{{ txn.created_at|date:"d M Y H:i" }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="6" class="text-center py-4 text-muted">No transactions</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

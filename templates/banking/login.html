@@ -1,0 +1,61 @@
+{% extends 'banking/base.html' %}
+{% load static %}
+{% block title %}X Bank | Login{% endblock %}
+{% block content %}
+<div class="d-flex align-items-center justify-content-center" style="min-height:88vh;padding:1.5rem;">
+  <div style="width:100%;max-width:440px;">
+    <div class="card-bank-dark p-4 p-md-5">
+      <div class="text-center mb-4">
+        <img src="{% static 'images/logo.png' %}" style="height:3rem;" alt="X Bank" onerror="this.style.display='none'">
+        <h2 class="mt-2 fw-bold" style="background:linear-gradient(120deg,#FFC857,#5cdb95);-webkit-background-clip:text;background-clip:text;color:transparent;">X Bank</h2>
+        <p class="text-white-50 small">Secure Internet Banking</p>
+      </div>
+      <form method="post" autocomplete="off" novalidate>
+        {% csrf_token %}
+        {% if form.non_field_errors %}
+        <div class="alert alert-danger rounded-3 small">{{ form.non_field_errors.0 }}</div>
+        {% endif %}
+        <div class="input-group-bank mb-3">
+          <i class="fas fa-user input-icon" style="color:#FFC857;"></i>
+          <input type="text" name="username" class="form-control form-control-bank"
+                 placeholder="Username / User ID" value="{{ form.username.value|default:'' }}" required autocomplete="off">
+        </div>
+        {% if form.username.errors %}<p class="text-danger small mt-n2 mb-2">{{ form.username.errors.0 }}</p>{% endif %}
+        <div class="input-group-bank mb-3" style="position:relative;">
+          <i class="fas fa-lock input-icon" style="color:#FFC857;"></i>
+          <input type="password" name="password" id="pwdField" class="form-control form-control-bank"
+                 placeholder="Password" required autocomplete="off">
+          <button type="button" onclick="togglePwd()" style="position:absolute;right:14px;top:50%;transform:translateY(-50%);background:none;border:none;color:#aaa;z-index:3;">
+            <i class="fas fa-eye" id="pwdIcon"></i>
+          </button>
+        </div>
+        <div class="d-flex justify-content-between mb-4">
+          <label class="text-white-50 small" style="cursor:pointer;">
+            <input type="checkbox" name="remember_me" class="form-check-input me-1"> Remember me
+          </label>
+          <a href="#" class="text-warning small text-decoration-none">Forgot Password?</a>
+        </div>
+        <button type="submit" class="btn btn-primary-bank w-100">
+          <i class="fas fa-sign-in-alt me-2"></i>Login to Dashboard
+        </button>
+        <p class="text-center text-white-50 small mt-4 mb-0">
+          No account? <a href="{% url 'banking:register' %}" class="text-warning text-decoration-none fw-semibold">Register here</a>
+        </p>
+      </form>
+    </div>
+    <p class="text-center text-white-50 small mt-3">
+      <i class="fas fa-shield-alt me-1 text-warning"></i> Brute-force protected · OTP secured · 2FA ready
+    </p>
+  </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+function togglePwd() {
+  const f = document.getElementById('pwdField');
+  const i = document.getElementById('pwdIcon');
+  f.type = f.type === 'password' ? 'text' : 'password';
+  i.className = f.type === 'password' ? 'fas fa-eye' : 'fas fa-eye-slash';
+}
+</script>
+{% endblock %}

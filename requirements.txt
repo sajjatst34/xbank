@@ -1,0 +1,12 @@
+Django==5.0.4
+PyMySQL==1.1.0
+django-cors-headers==4.3.1
+django-axes==6.4.0
+pyotp==2.9.0
+qrcode[pil]==7.4.2
+Pillow==10.4.0
+python-dotenv==1.0.1
+gunicorn==22.0.0
+whitenoise==6.7.0
+dj-database-url==2.2.0
+

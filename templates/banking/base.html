@@ -1,0 +1,129 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}X Bank{% endblock %}</title>
+  <meta name="csrf-token" content="{{ csrf_token }}">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family:'Inter',sans-serif; background:linear-gradient(135deg,#05386b 0%,#5cdb95 100%); min-height:100vh; }
+    .navbar-custom { background:linear-gradient(135deg,#84a6a2 0%,#10413c 100%); padding:.8rem 1.5rem; box-shadow:0 4px 20px rgba(0,0,0,.2); }
+    .bank-name { font-weight:800; font-size:1.6rem; background:linear-gradient(120deg,#ff4444,#4444ff); -webkit-background-clip:text; background-clip:text; color:transparent; }
+    .logo-img { height:2.5rem; }
+    .nav-link-custom { color:#eef5f2 !important; font-weight:500; padding:.5rem 1rem !important; border-radius:30px; transition:.2s; font-size:.9rem; }
+    .nav-link-custom:hover { background:rgba(255,255,255,.15); color:white !important; }
+    .dropdown-menu-dark-custom { background:#0A2E2A !important; border:1px solid rgba(255,215,0,.25) !important; border-radius:1rem !important; }
+    .dropdown-menu-dark-custom .dropdown-item { color:#eee !important; border-radius:.5rem; margin:.1rem .3rem; }
+    .dropdown-menu-dark-custom .dropdown-item:hover { background:rgba(255,200,87,.15) !important; }
+    .page-wrapper { min-height:calc(100vh - 66px); padding:2rem 0; }
+    .card-bank { background:rgba(255,255,255,.98); border-radius:1.8rem; box-shadow:0 20px 60px rgba(0,0,0,.15); border:1px solid rgba(255,215,0,.2); }
+    .card-bank-dark { background:rgba(10,46,42,.85); backdrop-filter:blur(12px); border-radius:1.8rem; border:1px solid rgba(255,255,255,.15); box-shadow:0 20px 50px rgba(0,0,0,.3); }
+    .card-header-bank { background:linear-gradient(115deg,#0A2E2A,#125B50); border-radius:1.8rem 1.8rem 0 0; padding:1.5rem; text-align:center; color:white; }
+    .btn-primary-bank { background:linear-gradient(95deg,#FFC857,#FFA726); border:none; padding:.8rem 2rem; font-weight:700; font-size:1rem; border-radius:30px; color:#0A2E2A; transition:.3s; }
+    .btn-primary-bank:hover { background:linear-gradient(95deg,#FFD966,#FFB347); transform:translateY(-2px); box-shadow:0 8px 18px rgba(0,0,0,.2); color:#0A2E2A; }
+    .btn-outline-bank { border:2px solid #FFC857; background:transparent; color:#FFC857; padding:.7rem 1.5rem; border-radius:30px; font-weight:600; transition:.3s; text-decoration:none; display:inline-block; }
+    .btn-outline-bank:hover { background:#FFC857; color:#0A2E2A; }
+    .form-control-bank { border:1.5px solid #e0e7e5; border-radius:1rem; padding:.8rem 1rem .8rem 3rem; transition:.3s; font-weight:500; width:100%; font-size:.95rem; }
+    .form-control-bank:focus { border-color:#FFC857; box-shadow:0 0 0 3px rgba(255,200,87,.2); outline:none; }
+    .form-control-bank:hover { border-color:#b0c4be; }
+    .input-group-bank { position:relative; margin-bottom:0; }
+    .input-icon { position:absolute; left:14px; top:50%; transform:translateY(-50%); color:#125B50; font-size:1rem; z-index:2; pointer-events:none; }
+    .balance-card { background:linear-gradient(135deg,#0A2E2A,#1a5c52); border-radius:1.4rem; padding:1.4rem; color:white; }
+    .badge-status { padding:.35rem .8rem; border-radius:20px; font-size:.72rem; font-weight:600; }
+    .badge-completed { background:rgba(39,174,96,.12); color:#27ae60; }
+    .badge-pending { background:rgba(241,196,15,.12); color:#d68910; }
+    .badge-failed { background:rgba(231,76,60,.12); color:#e74c3c; }
+    .badge-reversed { background:rgba(108,117,125,.12); color:#6c757d; }
+    footer { background:#071d1b; color:#cbdcd9; padding:1.5rem 0; margin-top:auto; }
+    select.form-control-bank { appearance:none; cursor:pointer; }
+    textarea.form-control-bank { height:auto; padding-top:.8rem; }
+    @media(max-width:768px) { .navbar-custom{padding:.6rem 1rem;} .bank-name{font-size:1.2rem;} }
+  </style>
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+<nav class="navbar navbar-expand-xl navbar-custom sticky-top">
+  <div class="container-fluid">
+    <a class="navbar-brand d-flex align-items-center gap-2" href="{% url 'banking:home' %}">
+      <img class="logo-img" src="{% static 'images/logo.png' %}" alt="X Bank" onerror="this.style.display='none'">
+      <span class="bank-name">X Bank</span>
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" style="border-color:rgba(255,255,255,.5);">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="mainNav">
+      <ul class="navbar-nav ms-auto mb-2 mb-xl-0 align-items-xl-center gap-1">
+        {% if user.is_authenticated %}
+          <li class="nav-item"><a class="nav-link nav-link-custom" href="{% url 'banking:dashboard' %}"><i class="fas fa-tachometer-alt me-1"></i>Dashboard</a></li>
+          <li class="nav-item"><a class="nav-link nav-link-custom" href="{% url 'banking:deposit' %}"><i class="fas fa-arrow-down me-1"></i>Deposit</a></li>
+          <li class="nav-item"><a class="nav-link nav-link-custom" href="{% url 'banking:withdraw' %}"><i class="fas fa-arrow-up me-1"></i>Withdraw</a></li>
+          <li class="nav-item"><a class="nav-link nav-link-custom" href="{% url 'banking:payment' %}"><i class="fas fa-credit-card me-1"></i>Payment</a></li>
+          <li class="nav-item"><a class="nav-link nav-link-custom" href="{% url 'banking:bill_payment' %}"><i class="fas fa-file-invoice-dollar me-1"></i>Bills</a></li>
+          <li class="nav-item"><a class="nav-link nav-link-custom" href="{% url 'banking:recharge' %}"><i class="fas fa-mobile-alt me-1"></i>Recharge</a></li>
+          <li class="nav-item"><a class="nav-link nav-link-custom" href="{% url 'banking:savings' %}"><i class="fas fa-piggy-bank me-1"></i>Savings</a></li>
+          <li class="nav-item"><a class="nav-link nav-link-custom" href="{% url 'banking:loan' %}"><i class="fas fa-hand-holding-heart me-1"></i>Loan</a></li>
+          <li class="nav-item"><a class="nav-link nav-link-custom" href="{% url 'banking:donation' %}"><i class="fas fa-heart me-1"></i>Donate</a></li>
+          <li class="nav-item dropdown">
+            <a class="nav-link nav-link-custom dropdown-toggle" href="#" data-bs-toggle="dropdown">
+              <i class="fas fa-user-circle me-1"></i>{{ user.first_name|default:user.username }}
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark-custom">
+              <li><a class="dropdown-item" href="{% url 'banking:profile' %}"><i class="fas fa-user me-2 text-warning"></i>Profile</a></li>
+              <li><a class="dropdown-item" href="{% url 'banking:transaction_history' %}"><i class="fas fa-history me-2 text-warning"></i>Transactions</a></li>
+              <li><a class="dropdown-item" href="{% url 'banking:setup_2fa' %}"><i class="fas fa-shield-alt me-2 text-warning"></i>2FA Settings</a></li>
+              {% if user.is_staff or user.is_superuser %}
+              <li><a class="dropdown-item" href="{% url 'admin_panel:dashboard' %}"><i class="fas fa-tachometer-alt me-2 text-warning"></i>Admin Panel</a></li>
+              {% endif %}
+              <li><hr class="dropdown-divider" style="border-color:rgba(255,255,255,.15)"></li>
+              <li><a class="dropdown-item text-danger" href="{% url 'banking:logout' %}"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+            </ul>
+          </li>
+        {% else %}
+          <li class="nav-item"><a class="nav-link nav-link-custom" href="{% url 'banking:login' %}"><i class="fas fa-sign-in-alt me-1"></i>Login</a></li>
+          <li class="nav-item"><a class="nav-link nav-link-custom" href="{% url 'banking:register' %}"><i class="fas fa-user-plus me-1"></i>Register</a></li>
+        {% endif %}
+      </ul>
+    </div>
+  </div>
+</nav>
+
+{% if messages %}
+<div class="position-fixed top-0 start-50 translate-middle-x mt-4" style="z-index:9999;width:92%;max-width:480px;">
+  {% for message in messages %}
+  <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show shadow-lg" style="border-radius:1rem;border:none;" role="alert">
+    <i class="fas fa-{% if 'success' in message.tags %}check-circle{% elif 'error' in message.tags or 'danger' in message.tags %}exclamation-circle{% elif 'warning' in message.tags %}exclamation-triangle{% else %}info-circle{% endif %} me-2"></i>
+    {{ message }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+<div class="page-wrapper">
+  {% block content %}{% endblock %}
+</div>
+
+<footer>
+  <div class="container text-center">
+    <p class="mb-1 fw-semibold">X Bank &copy; {% now "Y" %} — All rights reserved.</p>
+    <p class="small opacity-50 mb-0">🔒 256-bit SSL &nbsp;·&nbsp; OTP Protected &nbsp;·&nbsp; 2FA Secured</p>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  setTimeout(() => {
+    document.querySelectorAll('.alert.show').forEach(a => {
+      try { bootstrap.Alert.getOrCreateInstance(a).close(); } catch(e) {}
+    });
+  }, 5000);
+</script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,39 @@
+{% extends 'banking/base.html' %}
+{% block title %}X Bank | Two-Factor Verification{% endblock %}
+{% block content %}
+<div class="d-flex align-items-center justify-content-center" style="min-height:85vh;padding:1.5rem;">
+  <div style="width:100%;max-width:420px;">
+    <div class="card-bank-dark p-4 p-md-5 text-center">
+      <div class="mb-4">
+        <div style="width:80px;height:80px;background:linear-gradient(135deg,#27ae60,#2ecc71);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;">
+          <i class="fas fa-shield-alt fa-2x text-white"></i>
+        </div>
+        <h4 class="text-white fw-bold">Two-Factor Verification</h4>
+        <p class="text-white-50 small">
+          {% if has_totp %}Enter your <strong class="text-white">Google Authenticator</strong> code<br>or the OTP sent to{% else %}OTP sent to{% endif %}
+          <strong class="text-white">{{ masked_email }}</strong>
+        </p>
+      </div>
+      <form method="post">{% csrf_token %}
+        <input type="text" name="otp_code"
+               class="form-control text-center fw-bold fs-2 mb-3"
+               style="letter-spacing:14px;border-radius:1rem;background:rgba(255,255,255,.1);border:2px solid rgba(39,174,96,.4);color:white;padding:1rem;"
+               placeholder="000000" maxlength="6" inputmode="numeric" autocomplete="off" autofocus>
+        <p class="text-white-50 small mb-3">Expires in <span id="cd" class="text-warning fw-bold">5:00</span></p>
+        <button type="submit" class="btn btn-primary-bank w-100 mb-3"><i class="fas fa-unlock me-2"></i>Verify & Login</button>
+      </form>
+      <a href="{% url 'banking:login' %}" class="text-white-50 text-decoration-none small"><i class="fas fa-arrow-left me-1"></i>Back to Login</a>
+      <div class="mt-4 p-3 rounded-3" style="background:rgba(231,76,60,.08);border:1px solid rgba(231,76,60,.2);">
+        <p class="text-white-50 small mb-0"><i class="fas fa-exclamation-triangle text-warning me-1"></i>Never share this code. X Bank will never ask for it.</p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+document.querySelector('[name="otp_code"]').addEventListener('input',function(){this.value=this.value.replace(/\D/g,'').slice(0,6);});
+let s=300;const el=document.getElementById('cd');
+const t=setInterval(()=>{s--;const m=Math.floor(s/60);el.textContent=m+':'+String(s%60).padStart(2,'0');if(s<=0){clearInterval(t);el.textContent='Expired';el.className='text-danger fw-bold';}},1000);
+</script>
+{% endblock %}

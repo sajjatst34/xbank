@@ -1,0 +1,71 @@
+{% extends 'admin_panel/base.html' %}
+{% load humanize %}
+{% block title %}Bill Payments — X Bank Admin{% endblock %}
+{% block page_title %}Bill Payments{% endblock %}
+{% block page_subtitle %}Total collected: ৳{{ total|floatformat:2|intcomma }}{% endblock %}
+
+{% block content %}
+<div class="panel-card">
+  <div class="panel-card-header">
+    <span class="panel-card-title"><i class="fas fa-file-invoice-dollar me-2 text-warning"></i>All Bill Payments ({{ page_obj.paginator.count }})</span>
+  </div>
+  <div class="panel-card-body">
+    <form method="get" class="filter-bar mb-0">
+      <div class="search-bar" style="flex:1;min-width:200px;">
+        <i class="fas fa-search search-icon"></i>
+        <input type="text" name="q" value="{{ q }}" placeholder="Biller name, consumer ID…">
+      </div>
+      <select name="type" class="filter-select">
+        <option value="">All Types</option>
+        {% for val, label in biller_types %}
+        <option value="{{ val }}" {% if type_f == val %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+      <button type="submit" class="btn-admin-primary"><i class="fas fa-filter"></i> Filter</button>
+      <a href="{% url 'admin_panel:bill_payments' %}" class="btn-admin-primary" style="background:linear-gradient(95deg,#6c757d,#555);">Clear</a>
+    </form>
+  </div>
+  <div style="overflow-x:auto;">
+    <table class="admin-table">
+      <thead>
+        <tr><th>Biller</th><th>Type</th><th>Consumer ID</th><th>Account / User</th><th>Amount</th><th>Billing Month</th><th>Paid At</th></tr>
+      </thead>
+      <tbody>
+        {% for bill in page_obj %}
+        <tr>
+          <td>
+            <div style="font-weight:600;font-size:0.875rem;">{{ bill.biller_name }}</div>
+          </td>
+          <td>
+            <span style="font-size:0.78rem;padding:0.2rem 0.6rem;background:rgba(41,128,185,0.1);color:#2980b9;border-radius:20px;font-weight:600;">
+              {{ bill.get_biller_type_display }}
+            </span>
+          </td>
+          <td style="font-family:monospace;font-size:0.82rem;">{{ bill.consumer_id }}</td>
+          <td>
+            <div style="font-size:0.83rem;font-weight:600;">{{ bill.account.account_number }}</div>
+            <div style="font-size:0.73rem;color:#6c8c88;">{{ bill.account.user.get_full_name|default:bill.account.user.username }}</div>
+          </td>
+          <td class="fw-bold" style="color:#e74c3c;">৳{{ bill.amount|floatformat:2|intcomma }}</td>
+          <td style="font-size:0.82rem;color:#6c8c88;">{{ bill.billing_month|default:"—" }}</td>
+          <td style="font-size:0.78rem;color:#6c8c88;">{{ bill.paid_at|date:"d M Y H:i" }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="7" class="text-center py-5 text-muted">
+            <i class="fas fa-file-invoice-dollar fa-2x mb-2 d-block opacity-25"></i>No bill payments found
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% if page_obj.has_other_pages %}
+  <div class="panel-card-body d-flex justify-content-center gap-2 pt-3" style="border-top:1px solid #f0f4f3;">
+    {% if page_obj.has_previous %}<a href="?page={{ page_obj.previous_page_number }}&q={{ q }}&type={{ type_f }}" class="btn-admin-primary btn-admin-sm">« Prev</a>{% endif %}
+    <span style="padding:0.3rem 0.8rem;font-size:0.82rem;color:#6c8c88;">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+    {% if page_obj.has_next %}<a href="?page={{ page_obj.next_page_number }}&q={{ q }}&type={{ type_f }}" class="btn-admin-primary btn-admin-sm">Next »</a>{% endif %}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

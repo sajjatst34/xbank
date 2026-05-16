@@ -1,0 +1,81 @@
+{% extends 'banking/base.html' %}
+{% load static %}
+{% block title %}X Bank | Secure Digital Banking{% endblock %}
+{% block content %}
+<section style="background:linear-gradient(125deg,#ffffff 0%,#9bb0a0 100%);padding:4rem 0;">
+  <div class="container">
+    <div class="row align-items-center gy-4">
+      <div class="col-lg-7">
+        <span class="badge bg-success mb-3" style="border-radius:30px;padding:.5rem 1.2rem;"><i class="fas fa-shield-alt me-1"></i> SECURE · SMART · SEAMLESS</span>
+        <h1 style="font-size:3rem;font-weight:800;color:#0A2E2A;line-height:1.15;" class="mb-3">Banking that adapts to <span style="color:#125B50;">your lifestyle</span></h1>
+        <p class="text-muted fs-5 mb-4">Complete digital banking — from deposits to donations. OTP-protected, 2FA-secured, 24/7 online access.</p>
+        <div class="d-flex gap-3 flex-wrap">
+          <a href="{% url 'banking:register' %}" class="btn btn-primary-bank"><i class="fas fa-user-plus me-2"></i>Open Free Account</a>
+          <a href="{% url 'banking:login' %}" class="btn btn-outline-bank"><i class="fas fa-sign-in-alt me-2"></i>Login</a>
+        </div>
+        <div class="d-flex gap-4 mt-4 flex-wrap">
+          <div><strong class="fs-4 text-success">৳0</strong><br><small class="text-muted">Account Fees</small></div>
+          <div><strong class="fs-4 text-success">2FA</strong><br><small class="text-muted">Protected</small></div>
+          <div><strong class="fs-4 text-success">24/7</strong><br><small class="text-muted">Access</small></div>
+          <div><strong class="fs-4 text-success">OTP</strong><br><small class="text-muted">Every Transaction</small></div>
+        </div>
+      </div>
+      <div class="col-lg-5 text-center d-none d-lg-block">
+        <img src="{% static 'images/mobile-banking.svg' %}" alt="Mobile Banking" style="max-width:90%;filter:drop-shadow(0 20px 40px rgba(0,0,0,.15));" onerror="this.style.display='none'">
+      </div>
+    </div>
+  </div>
+</section>
+
+<section style="background:#0A2E2A;padding:1.2rem 0;">
+  <div class="container">
+    <div class="row text-center text-white g-3">
+      <div class="col-4 col-md-2"><i class="fas fa-lock fa-lg text-warning d-block mb-1"></i><small>256-bit SSL</small></div>
+      <div class="col-4 col-md-2"><i class="fas fa-shield-alt fa-lg text-warning d-block mb-1"></i><small>OTP Guard</small></div>
+      <div class="col-4 col-md-2"><i class="fas fa-mobile-alt fa-lg text-warning d-block mb-1"></i><small>2FA Auth</small></div>
+      <div class="col-4 col-md-2"><i class="fas fa-eye-slash fa-lg text-warning d-block mb-1"></i><small>No CVV Store</small></div>
+      <div class="col-4 col-md-2"><i class="fas fa-ban fa-lg text-warning d-block mb-1"></i><small>Anti-BruteForce</small></div>
+      <div class="col-4 col-md-2"><i class="fas fa-clock fa-lg text-warning d-block mb-1"></i><small>Auto Logout</small></div>
+    </div>
+  </div>
+</section>
+
+<section class="py-5" style="background:#f8f9fa;">
+  <div class="container">
+    <div class="text-center mb-5">
+      <h2 class="fw-bold" style="color:#0A2E2A;">All Banking Services in One Place</h2>
+      <p class="text-muted">Every service protected by OTP and 2FA</p>
+    </div>
+    <div class="row g-4">
+      <div class="col-md-6 col-lg-3"><div class="bg-white rounded-4 p-4 shadow-sm h-100" style="transition:.3s;" onmouseover="this.style.transform='translateY(-6px)'" onmouseout="this.style.transform=''">
+        <div style="background:#E9F3F0;width:60px;height:60px;border-radius:18px;display:flex;align-items:center;justify-content:center;margin-bottom:1rem;"><i class="fas fa-arrow-down fa-xl text-success"></i></div>
+        <h6 class="fw-bold">Deposit</h6><p class="text-muted small">Add funds via card, bank transfer, or mobile banking.</p>
+        <a href="{% url 'banking:deposit' %}" class="btn btn-sm btn-outline-success">Get Started →</a>
+      </div></div>
+      <div class="col-md-6 col-lg-3"><div class="bg-white rounded-4 p-4 shadow-sm h-100" style="transition:.3s;" onmouseover="this.style.transform='translateY(-6px)'" onmouseout="this.style.transform=''">
+        <div style="background:#E9F3F0;width:60px;height:60px;border-radius:18px;display:flex;align-items:center;justify-content:center;margin-bottom:1rem;"><i class="fas fa-credit-card fa-xl text-primary"></i></div>
+        <h6 class="fw-bold">Card Payment</h6><p class="text-muted small">Send money or pay by card with Luhn validation and CVV check.</p>
+        <a href="{% url 'banking:payment' %}" class="btn btn-sm btn-outline-primary">Pay Now →</a>
+      </div></div>
+      <div class="col-md-6 col-lg-3"><div class="bg-white rounded-4 p-4 shadow-sm h-100" style="transition:.3s;" onmouseover="this.style.transform='translateY(-6px)'" onmouseout="this.style.transform=''">
+        <div style="background:#E9F3F0;width:60px;height:60px;border-radius:18px;display:flex;align-items:center;justify-content:center;margin-bottom:1rem;"><i class="fas fa-piggy-bank fa-xl text-warning"></i></div>
+        <h6 class="fw-bold">Savings & FD</h6><p class="text-muted small">Earn up to 8% p.a. on Fixed Deposits and DPS plans.</p>
+        <a href="{% url 'banking:savings' %}" class="btn btn-sm btn-outline-warning">Save Now →</a>
+      </div></div>
+      <div class="col-md-6 col-lg-3"><div class="bg-white rounded-4 p-4 shadow-sm h-100" style="transition:.3s;" onmouseover="this.style.transform='translateY(-6px)'" onmouseout="this.style.transform=''">
+        <div style="background:#E9F3F0;width:60px;height:60px;border-radius:18px;display:flex;align-items:center;justify-content:center;margin-bottom:1rem;"><i class="fas fa-hand-holding-heart fa-xl text-danger"></i></div>
+        <h6 class="fw-bold">Loans</h6><p class="text-muted small">Personal, home, car, and education loans with EMI calculator.</p>
+        <a href="{% url 'banking:loan' %}" class="btn btn-sm btn-outline-danger">Apply →</a>
+      </div></div>
+    </div>
+  </div>
+</section>
+
+<section class="py-5" style="background:linear-gradient(135deg,#0A2E2A,#125B50);">
+  <div class="container text-center text-white">
+    <h2 class="fw-bold mb-3">Ready to bank smarter?</h2>
+    <p class="opacity-75 mb-4">Join X Bank today. Free account, zero hidden fees, maximum security.</p>
+    <a href="{% url 'banking:register' %}" class="btn btn-primary-bank btn-lg"><i class="fas fa-user-plus me-2"></i>Open Free Account</a>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,416 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}X Bank Admin{% endblock %}</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --sidebar-width: 260px;
+      --primary: #0A2E2A;
+      --primary-light: #125B50;
+      --accent: #FFC857;
+      --accent2: #5cdb95;
+      --danger: #e74c3c;
+      --success: #27ae60;
+      --warning: #f39c12;
+      --info: #2980b9;
+      --bg: #f0f4f3;
+      --card-bg: #fff;
+      --text: #1a2e2b;
+      --text-muted: #6c8c88;
+      --border: #dde8e6;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; }
+
+    /* Sidebar */
+    .sidebar {
+      width: var(--sidebar-width);
+      min-height: 100vh;
+      background: linear-gradient(180deg, #071e1b 0%, #0A2E2A 50%, #0d3d38 100%);
+      position: fixed; top: 0; left: 0;
+      display: flex; flex-direction: column;
+      z-index: 1000;
+      transition: transform 0.3s ease;
+      box-shadow: 4px 0 20px rgba(0,0,0,0.25);
+    }
+    .sidebar-brand {
+      padding: 1.5rem 1.2rem 1rem;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      display: flex; align-items: center; gap: 0.7rem;
+    }
+    .sidebar-brand .brand-icon {
+      width: 40px; height: 40px;
+      background: linear-gradient(135deg, var(--accent), #ffa726);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; color: var(--primary); font-weight: 800;
+    }
+    .sidebar-brand .brand-text { color: white; font-weight: 700; font-size: 1.1rem; line-height: 1.2; }
+    .sidebar-brand .brand-sub { color: rgba(255,255,255,0.45); font-size: 0.7rem; font-weight: 400; }
+
+    .sidebar-nav { flex: 1; padding: 1rem 0.75rem; overflow-y: auto; }
+    .nav-label { color: rgba(255,255,255,0.35); font-size: 0.68rem; font-weight: 600; letter-spacing: 1.2px; text-transform: uppercase; padding: 0.8rem 0.5rem 0.3rem; }
+    .nav-item-custom { margin-bottom: 2px; }
+    .nav-link-admin {
+      display: flex; align-items: center; gap: 0.75rem;
+      padding: 0.65rem 0.9rem;
+      color: rgba(255,255,255,0.65);
+      text-decoration: none;
+      border-radius: 10px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+    .nav-link-admin:hover { background: rgba(255,255,255,0.08); color: white; }
+    .nav-link-admin.active { background: linear-gradient(95deg, rgba(255,200,87,0.18), rgba(255,200,87,0.06)); color: var(--accent); border-left: 3px solid var(--accent); }
+    .nav-link-admin .nav-icon { width: 18px; text-align: center; font-size: 0.9rem; }
+    .nav-badge { margin-left: auto; background: var(--danger); color: white; border-radius: 20px; padding: 1px 7px; font-size: 0.68rem; font-weight: 700; }
+
+    .sidebar-footer {
+      padding: 1rem;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+    .sidebar-user { display: flex; align-items: center; gap: 0.7rem; }
+    .sidebar-user .user-avatar {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), #ffa726);
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; color: var(--primary); font-size: 0.9rem;
+    }
+    .sidebar-user .user-info { flex: 1; min-width: 0; }
+    .sidebar-user .user-name { color: white; font-size: 0.8rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .sidebar-user .user-role { color: rgba(255,255,255,0.4); font-size: 0.68rem; }
+
+    /* Main */
+    .main-content {
+      margin-left: var(--sidebar-width);
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+    .topbar {
+      background: white;
+      border-bottom: 1px solid var(--border);
+      padding: 0.9rem 1.8rem;
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 100;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+    }
+    .topbar-left { display: flex; align-items: center; gap: 1rem; }
+    .topbar-title { font-weight: 700; font-size: 1.1rem; color: var(--primary); }
+    .topbar-subtitle { font-size: 0.78rem; color: var(--text-muted); }
+    .topbar-right { display: flex; align-items: center; gap: 0.75rem; }
+    .topbar-btn {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      border: 1.5px solid var(--border);
+      background: white;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--text-muted); cursor: pointer; text-decoration: none;
+      transition: all 0.2s;
+      font-size: 0.9rem;
+    }
+    .topbar-btn:hover { background: var(--bg); color: var(--primary); border-color: var(--primary-light); }
+
+    .content-area { padding: 1.8rem; flex: 1; }
+
+    /* Cards */
+    .stat-card {
+      background: white;
+      border-radius: 16px;
+      padding: 1.4rem;
+      border: 1px solid var(--border);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .stat-card:hover { transform: translateY(-3px); box-shadow: 0 12px 30px rgba(0,0,0,0.1); }
+    .stat-icon {
+      width: 48px; height: 48px;
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.2rem;
+    }
+    .stat-icon.green { background: rgba(39,174,96,0.12); color: #27ae60; }
+    .stat-icon.blue { background: rgba(41,128,185,0.12); color: #2980b9; }
+    .stat-icon.orange { background: rgba(255,200,87,0.15); color: #e6a817; }
+    .stat-icon.red { background: rgba(231,76,60,0.12); color: #e74c3c; }
+    .stat-icon.purple { background: rgba(142,68,173,0.12); color: #8e44ad; }
+    .stat-icon.teal { background: rgba(26,188,156,0.12); color: #1abc9c; }
+    .stat-value { font-size: 1.7rem; font-weight: 800; color: var(--primary); line-height: 1.1; }
+    .stat-label { font-size: 0.8rem; color: var(--text-muted); font-weight: 500; margin-top: 2px; }
+    .stat-change { font-size: 0.75rem; font-weight: 600; margin-top: 0.5rem; }
+    .stat-change.up { color: var(--success); }
+    .stat-change.down { color: var(--danger); }
+
+    /* Panel cards */
+    .panel-card { background: white; border-radius: 16px; border: 1px solid var(--border); overflow: hidden; }
+    .panel-card-header { padding: 1.1rem 1.5rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .panel-card-title { font-weight: 700; font-size: 0.95rem; color: var(--primary); }
+    .panel-card-body { padding: 1.2rem 1.5rem; }
+
+    /* Tables */
+    .admin-table { width: 100%; border-collapse: collapse; }
+    .admin-table th { padding: 0.7rem 1rem; font-size: 0.72rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.6px; border-bottom: 2px solid var(--border); background: #fafcfb; text-align: left; }
+    .admin-table td { padding: 0.85rem 1rem; font-size: 0.85rem; border-bottom: 1px solid #f0f4f3; vertical-align: middle; }
+    .admin-table tr:last-child td { border-bottom: none; }
+    .admin-table tr:hover td { background: #fafcfb; }
+
+    /* Badges */
+    .badge-admin { padding: 0.3rem 0.75rem; border-radius: 20px; font-size: 0.72rem; font-weight: 600; }
+    .badge-active { background: rgba(39,174,96,0.12); color: #27ae60; }
+    .badge-inactive { background: rgba(108,117,125,0.12); color: #6c757d; }
+    .badge-pending { background: rgba(243,156,18,0.12); color: #f39c12; }
+    .badge-approved { background: rgba(39,174,96,0.12); color: #27ae60; }
+    .badge-rejected { background: rgba(231,76,60,0.12); color: #e74c3c; }
+    .badge-completed { background: rgba(39,174,96,0.12); color: #27ae60; }
+    .badge-failed { background: rgba(231,76,60,0.12); color: #e74c3c; }
+    .badge-frozen { background: rgba(41,128,185,0.12); color: #2980b9; }
+    .badge-closed { background: rgba(108,117,125,0.12); color: #6c757d; }
+
+    /* Buttons */
+    .btn-admin-primary { background: linear-gradient(95deg, var(--primary), var(--primary-light)); color: white; border: none; padding: 0.55rem 1.3rem; border-radius: 10px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: 0.2s; text-decoration: none; display: inline-flex; align-items: center; gap: 0.4rem; }
+    .btn-admin-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 15px rgba(10,46,42,0.3); color: white; }
+    .btn-admin-accent { background: linear-gradient(95deg, var(--accent), #ffa726); color: var(--primary); border: none; padding: 0.55rem 1.3rem; border-radius: 10px; font-size: 0.85rem; font-weight: 700; cursor: pointer; transition: 0.2s; text-decoration: none; display: inline-flex; align-items: center; gap: 0.4rem; }
+    .btn-admin-accent:hover { transform: translateY(-1px); box-shadow: 0 6px 15px rgba(255,200,87,0.4); color: var(--primary); }
+    .btn-admin-danger { background: rgba(231,76,60,0.1); color: var(--danger); border: 1.5px solid rgba(231,76,60,0.2); padding: 0.45rem 0.9rem; border-radius: 8px; font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: 0.2s; text-decoration: none; display: inline-flex; align-items: center; gap: 0.3rem; }
+    .btn-admin-danger:hover { background: var(--danger); color: white; }
+    .btn-admin-success { background: rgba(39,174,96,0.1); color: var(--success); border: 1.5px solid rgba(39,174,96,0.2); padding: 0.45rem 0.9rem; border-radius: 8px; font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: 0.2s; text-decoration: none; display: inline-flex; align-items: center; gap: 0.3rem; }
+    .btn-admin-success:hover { background: var(--success); color: white; }
+    .btn-admin-sm { padding: 0.3rem 0.7rem; font-size: 0.75rem; border-radius: 7px; }
+
+    /* Form */
+    .form-admin { }
+    .form-admin .form-label { font-size: 0.82rem; font-weight: 600; color: var(--primary); margin-bottom: 0.3rem; }
+    .form-admin .form-control, .form-admin .form-select {
+      border: 1.5px solid var(--border); border-radius: 10px; padding: 0.6rem 0.9rem;
+      font-size: 0.875rem; transition: 0.2s; font-family: 'Inter', sans-serif;
+    }
+    .form-admin .form-control:focus, .form-admin .form-select:focus {
+      border-color: var(--accent); box-shadow: 0 0 0 3px rgba(255,200,87,0.15); outline: none;
+    }
+
+    /* Search bar */
+    .search-bar { position: relative; }
+    .search-bar input { border: 1.5px solid var(--border); border-radius: 10px; padding: 0.55rem 0.9rem 0.55rem 2.5rem; font-size: 0.875rem; width: 100%; transition: 0.2s; }
+    .search-bar input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(255,200,87,0.15); outline: none; }
+    .search-bar .search-icon { position: absolute; left: 0.8rem; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 0.85rem; }
+
+    /* Alerts */
+    .alert-admin { border-radius: 12px; border: none; padding: 0.9rem 1.2rem; font-size: 0.875rem; }
+
+    /* Charts placeholder */
+    .chart-container { height: 220px; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #fafcfb, #f0f4f3); border-radius: 12px; }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 3px; }
+
+    /* Breadcrumb */
+    .breadcrumb-admin { display: flex; align-items: center; gap: 0.4rem; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 1.5rem; }
+    .breadcrumb-admin a { color: var(--primary-light); text-decoration: none; }
+    .breadcrumb-admin a:hover { text-decoration: underline; }
+
+    /* Responsive */
+    .sidebar-toggle { display: none; background: none; border: none; font-size: 1.2rem; color: var(--primary); cursor: pointer; }
+    @media (max-width: 992px) {
+      .sidebar { transform: translateX(-100%); }
+      .sidebar.show { transform: translateX(0); }
+      .main-content { margin-left: 0; }
+      .sidebar-toggle { display: block; }
+    }
+    @media (max-width: 768px) {
+      .content-area { padding: 1rem; }
+      .stat-value { font-size: 1.4rem; }
+    }
+
+    /* Page overlay */
+    .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 999; }
+    .sidebar-overlay.show { display: block; }
+
+    /* User status dot */
+    .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 4px; }
+    .status-dot.active { background: var(--success); }
+    .status-dot.inactive { background: var(--text-muted); }
+    .status-dot.frozen { background: var(--info); }
+
+    /* Dropdown filters */
+    .filter-bar { display: flex; gap: 0.7rem; flex-wrap: wrap; align-items: center; }
+    .filter-select { border: 1.5px solid var(--border); border-radius: 10px; padding: 0.5rem 0.8rem; font-size: 0.82rem; font-family: 'Inter', sans-serif; cursor: pointer; background: white; }
+    .filter-select:focus { outline: none; border-color: var(--accent); }
+  </style>
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+<!-- Sidebar Overlay (mobile) -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+<!-- Sidebar -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-brand">
+    <div class="brand-icon">X</div>
+    <div>
+      <div class="brand-text">X Bank</div>
+      <div class="brand-sub">Admin Panel</div>
+    </div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <div class="nav-label">Overview</div>
+    <div class="nav-item-custom">
+      <a href="{% url 'admin_panel:dashboard' %}" class="nav-link-admin {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+        <span class="nav-icon"><i class="fas fa-th-large"></i></span> Dashboard
+      </a>
+    </div>
+
+    <div class="nav-label mt-2">User Management</div>
+    <div class="nav-item-custom">
+      <a href="{% url 'admin_panel:users' %}" class="nav-link-admin {% if 'user' in request.resolver_match.url_name %}active{% endif %}">
+        <span class="nav-icon"><i class="fas fa-users"></i></span> All Users
+      </a>
+    </div>
+    <div class="nav-item-custom">
+      <a href="{% url 'admin_panel:kyc_pending' %}" class="nav-link-admin {% if request.resolver_match.url_name == 'kyc_pending' %}active{% endif %}">
+        <span class="nav-icon"><i class="fas fa-id-card"></i></span> KYC Verification
+        {% if pending_kyc_count %}<span class="nav-badge">{{ pending_kyc_count }}</span>{% endif %}
+      </a>
+    </div>
+
+    <div class="nav-label mt-2">Financials</div>
+    <div class="nav-item-custom">
+      <a href="{% url 'admin_panel:accounts' %}" class="nav-link-admin {% if request.resolver_match.url_name == 'accounts' %}active{% endif %}">
+        <span class="nav-icon"><i class="fas fa-university"></i></span> Accounts
+      </a>
+    </div>
+    <div class="nav-item-custom">
+      <a href="{% url 'admin_panel:transactions' %}" class="nav-link-admin {% if request.resolver_match.url_name == 'transactions' %}active{% endif %}">
+        <span class="nav-icon"><i class="fas fa-exchange-alt"></i></span> Transactions
+      </a>
+    </div>
+    <div class="nav-item-custom">
+      <a href="{% url 'admin_panel:loans' %}" class="nav-link-admin {% if request.resolver_match.url_name == 'loans' %}active{% endif %}">
+        <span class="nav-icon"><i class="fas fa-hand-holding-usd"></i></span> Loans
+        {% if pending_loan_count %}<span class="nav-badge">{{ pending_loan_count }}</span>{% endif %}
+      </a>
+    </div>
+    <div class="nav-item-custom">
+      <a href="{% url 'admin_panel:savings' %}" class="nav-link-admin {% if request.resolver_match.url_name == 'savings' %}active{% endif %}">
+        <span class="nav-icon"><i class="fas fa-piggy-bank"></i></span> Savings Plans
+      </a>
+    </div>
+    <div class="nav-item-custom">
+      <a href="{% url 'admin_panel:cards' %}" class="nav-link-admin {% if request.resolver_match.url_name == 'cards' %}active{% endif %}">
+        <span class="nav-icon"><i class="fas fa-credit-card"></i></span> Cards
+      </a>
+    </div>
+
+    <div class="nav-label mt-2">Services</div>
+    <div class="nav-item-custom">
+      <a href="{% url 'admin_panel:bill_payments' %}" class="nav-link-admin {% if request.resolver_match.url_name == 'bill_payments' %}active{% endif %}">
+        <span class="nav-icon"><i class="fas fa-file-invoice-dollar"></i></span> Bill Payments
+      </a>
+    </div>
+    <div class="nav-item-custom">
+      <a href="{% url 'admin_panel:recharges' %}" class="nav-link-admin {% if request.resolver_match.url_name == 'recharges' %}active{% endif %}">
+        <span class="nav-icon"><i class="fas fa-mobile-alt"></i></span> Mobile Recharges
+      </a>
+    </div>
+    <div class="nav-item-custom">
+      <a href="{% url 'admin_panel:donations' %}" class="nav-link-admin {% if request.resolver_match.url_name == 'donations' %}active{% endif %}">
+        <span class="nav-icon"><i class="fas fa-heart"></i></span> Donations
+      </a>
+    </div>
+
+    <div class="nav-label mt-2">Security</div>
+    <div class="nav-item-custom">
+      <a href="{% url 'admin_panel:audit_logs' %}" class="nav-link-admin {% if request.resolver_match.url_name == 'audit_logs' %}active{% endif %}">
+        <span class="nav-icon"><i class="fas fa-shield-alt"></i></span> Audit Logs
+      </a>
+    </div>
+
+    <div class="nav-label mt-2">System</div>
+    <div class="nav-item-custom">
+      <a href="{% url 'banking:home' %}" class="nav-link-admin" target="_blank">
+        <span class="nav-icon"><i class="fas fa-external-link-alt"></i></span> View Site
+      </a>
+    </div>
+    <div class="nav-item-custom">
+      <a href="{% url 'banking:logout' %}" class="nav-link-admin" style="color: rgba(231,76,60,0.7);">
+        <span class="nav-icon"><i class="fas fa-sign-out-alt"></i></span> Logout
+      </a>
+    </div>
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="sidebar-user">
+      <div class="user-avatar">{{ request.user.first_name|first|upper }}{{ request.user.last_name|first|upper }}</div>
+      <div class="user-info">
+        <div class="user-name">{{ request.user.get_full_name|default:request.user.username }}</div>
+        <div class="user-role">Super Admin</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- Main -->
+<div class="main-content">
+  <!-- Topbar -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <button class="sidebar-toggle" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+      <div>
+        <div class="topbar-title">{% block page_title %}Admin Panel{% endblock %}</div>
+        <div class="topbar-subtitle">{% block page_subtitle %}X Bank Administration{% endblock %}</div>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <span class="text-muted small d-none d-md-inline">{{ request.user.username }}</span>
+      <a href="{% url 'banking:home' %}" class="topbar-btn" title="View Site" target="_blank">
+        <i class="fas fa-external-link-alt"></i>
+      </a>
+      <a href="{% url 'banking:logout' %}" class="topbar-btn" title="Logout" style="color: #e74c3c; border-color: rgba(231,76,60,0.2);">
+        <i class="fas fa-sign-out-alt"></i>
+      </a>
+    </div>
+  </div>
+
+  <!-- Messages -->
+  {% if messages %}
+  <div style="padding: 1rem 1.8rem 0;">
+    {% for message in messages %}
+    <div class="alert alert-admin alert-{% if 'error' in message.tags or 'danger' in message.tags %}danger{% elif 'success' in message.tags %}success{% elif 'warning' in message.tags %}warning{% else %}info{% endif %} alert-dismissible fade show">
+      <i class="fas fa-{% if 'success' in message.tags %}check-circle{% elif 'error' in message.tags %}exclamation-circle{% else %}info-circle{% endif %} me-2"></i>
+      {{ message }}
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <div class="content-area">
+    {% block content %}{% endblock %}
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('show');
+  document.getElementById('sidebarOverlay').classList.toggle('show');
+}
+setTimeout(() => {
+  document.querySelectorAll('.alert.show').forEach(a => {
+    try { bootstrap.Alert.getOrCreateInstance(a).close(); } catch(e) {}
+  });
+}, 5000);
+</script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,224 @@
+{% extends 'admin_panel/base.html' %}
+{% load humanize %}
+{% block title %}User: {{ u.username }} — X Bank Admin{% endblock %}
+{% block page_title %}User Detail{% endblock %}
+{% block page_subtitle %}{{ u.get_full_name|default:u.username }}{% endblock %}
+
+{% block content %}
+<div class="breadcrumb-admin">
+  <a href="{% url 'admin_panel:users' %}">Users</a>
+  <i class="fas fa-chevron-right" style="font-size:0.6rem;"></i>
+  <span>{{ u.username }}</span>
+</div>
+
+<div class="row g-3 mb-4">
+  <!-- Profile Card -->
+  <div class="col-lg-4">
+    <div class="panel-card h-100">
+      <div class="panel-card-body text-center" style="padding-top:2rem;">
+        <div style="width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,#0A2E2A,#125B50);display:flex;align-items:center;justify-content:center;color:white;font-size:1.6rem;font-weight:700;margin:0 auto 1rem;">
+          {{ u.first_name|first|upper }}{{ u.last_name|first|upper }}
+        </div>
+        <h5 class="fw-bold mb-1" style="color:var(--primary);">{{ u.get_full_name|default:u.username }}</h5>
+        <p style="color:#6c8c88;font-size:0.85rem;">@{{ u.username }}</p>
+        <p style="font-size:0.85rem;">{{ u.email }}</p>
+        {% if u.is_staff %}<span class="badge-admin badge-active mb-2 d-inline-block">Staff</span>{% endif %}
+        {% if u.is_superuser %}<span class="badge-admin badge-completed mb-2 d-inline-block ms-1">Superuser</span>{% endif %}
+      </div>
+      <div style="border-top:1px solid var(--border);padding:1rem 1.5rem;">
+        <div class="d-flex justify-content-between py-1" style="font-size:0.83rem;"><span style="color:#6c8c88;">Phone</span><span>{{ u.phone|default:"—" }}</span></div>
+        <div class="d-flex justify-content-between py-1" style="font-size:0.83rem;"><span style="color:#6c8c88;">Gender</span><span>{{ u.get_gender_display|default:"—" }}</span></div>
+        <div class="d-flex justify-content-between py-1" style="font-size:0.83rem;"><span style="color:#6c8c88;">City</span><span>{{ u.city|default:"—" }}</span></div>
+        <div class="d-flex justify-content-between py-1" style="font-size:0.83rem;"><span style="color:#6c8c88;">Country</span><span>{{ u.country }}</span></div>
+        <div class="d-flex justify-content-between py-1" style="font-size:0.83rem;"><span style="color:#6c8c88;">Joined</span><span>{{ u.date_joined|date:"d M Y" }}</span></div>
+        <div class="d-flex justify-content-between py-1" style="font-size:0.83rem;"><span style="color:#6c8c88;">Last Login</span><span>{{ u.last_login|date:"d M Y H:i"|default:"Never" }}</span></div>
+        <div class="d-flex justify-content-between py-1" style="font-size:0.83rem;"><span style="color:#6c8c88;">Last IP</span><span>{{ u.last_login_ip|default:"—" }}</span></div>
+        <div class="d-flex justify-content-between py-1" style="font-size:0.83rem;"><span style="color:#6c8c88;">Total Balance</span><span class="fw-bold" style="color:var(--primary);">৳{{ total_balance|floatformat:2|intcomma }}</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Verification & Actions -->
+  <div class="col-lg-8">
+    <div class="panel-card mb-3">
+      <div class="panel-card-header">
+        <span class="panel-card-title"><i class="fas fa-shield-alt me-2 text-warning"></i>Verification Status</span>
+      </div>
+      <div class="panel-card-body">
+        <div class="row g-3">
+          <div class="col-sm-3 text-center">
+            <div style="font-size:1.8rem;margin-bottom:4px;">{% if u.is_email_verified %}✅{% else %}❌{% endif %}</div>
+            <div style="font-size:0.78rem;color:#6c8c88;">Email</div>
+          </div>
+          <div class="col-sm-3 text-center">
+            <div style="font-size:1.8rem;margin-bottom:4px;">{% if u.is_phone_verified %}✅{% else %}❌{% endif %}</div>
+            <div style="font-size:0.78rem;color:#6c8c88;">Phone</div>
+          </div>
+          <div class="col-sm-3 text-center">
+            <div style="font-size:1.8rem;margin-bottom:4px;">{% if u.is_kyc_verified %}✅{% else %}❌{% endif %}</div>
+            <div style="font-size:0.78rem;color:#6c8c88;">KYC</div>
+          </div>
+          <div class="col-sm-3 text-center">
+            <div style="font-size:1.8rem;margin-bottom:4px;">{% if u.two_factor_enabled %}✅{% else %}❌{% endif %}</div>
+            <div style="font-size:0.78rem;color:#6c8c88;">2FA</div>
+          </div>
+        </div>
+        {% if u.id_type %}
+        <div class="mt-3 p-3" style="background:#f8fafa;border-radius:10px;font-size:0.85rem;">
+          <strong>ID Type:</strong> {{ u.get_id_type_display }} &nbsp;|&nbsp; <strong>ID Number:</strong> {{ u.id_number|default:"—" }}
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Admin Actions -->
+    <div class="panel-card">
+      <div class="panel-card-header">
+        <span class="panel-card-title"><i class="fas fa-bolt me-2 text-warning"></i>Admin Actions</span>
+      </div>
+      <div class="panel-card-body">
+        <div class="d-flex flex-wrap gap-2">
+          <form method="post" onsubmit="return confirm('Are you sure?')">
+            {% csrf_token %}<input type="hidden" name="action" value="toggle_active">
+            <button type="submit" class="{% if u.is_active %}btn-admin-danger{% else %}btn-admin-success{% endif %}">
+              <i class="fas fa-{% if u.is_active %}ban{% else %}check{% endif %}"></i>
+              {% if u.is_active %}Deactivate{% else %}Activate{% endif %} User
+            </button>
+          </form>
+          {% if not u.is_kyc_verified %}
+          <form method="post">
+            {% csrf_token %}<input type="hidden" name="action" value="verify_kyc">
+            <button type="submit" class="btn-admin-success"><i class="fas fa-id-card"></i> Verify KYC</button>
+          </form>
+          {% else %}
+          <form method="post" onsubmit="return confirm('Revoke KYC?')">
+            {% csrf_token %}<input type="hidden" name="action" value="revoke_kyc">
+            <button type="submit" class="btn-admin-danger"><i class="fas fa-times"></i> Revoke KYC</button>
+          </form>
+          {% endif %}
+          {% if not u.is_staff %}
+          <form method="post">
+            {% csrf_token %}<input type="hidden" name="action" value="make_staff">
+            <button type="submit" class="btn-admin-primary"><i class="fas fa-user-shield"></i> Make Staff</button>
+          </form>
+          {% else %}
+          <form method="post" onsubmit="return confirm('Revoke staff access?')">
+            {% csrf_token %}<input type="hidden" name="action" value="revoke_staff">
+            <button type="submit" class="btn-admin-danger"><i class="fas fa-user-times"></i> Revoke Staff</button>
+          </form>
+          {% endif %}
+          {% if u.two_factor_enabled %}
+          <form method="post" onsubmit="return confirm('Reset 2FA for this user?')">
+            {% csrf_token %}<input type="hidden" name="action" value="reset_2fa">
+            <button type="submit" class="btn-admin-danger"><i class="fas fa-redo"></i> Reset 2FA</button>
+          </form>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Accounts -->
+<div class="panel-card mb-3">
+  <div class="panel-card-header">
+    <span class="panel-card-title"><i class="fas fa-university me-2 text-warning"></i>Bank Accounts ({{ accounts.count }})</span>
+  </div>
+  <div style="overflow-x:auto;">
+    <table class="admin-table">
+      <thead>
+        <tr><th>Account #</th><th>Type</th><th>Balance</th><th>Status</th><th>Primary</th><th>Opened</th><th>Action</th></tr>
+      </thead>
+      <tbody>
+        {% for acc in accounts %}
+        <tr>
+          <td style="font-family:monospace;font-size:0.85rem;">{{ acc.account_number }}</td>
+          <td>{{ acc.get_account_type_display }}</td>
+          <td class="fw-semibold" style="color:{% if acc.balance > 0 %}#27ae60{% else %}#e74c3c{% endif %}">৳{{ acc.balance|floatformat:2|intcomma }}</td>
+          <td><span class="badge-admin badge-{{ acc.status|lower }}">{{ acc.get_status_display }}</span></td>
+          <td>{% if acc.is_primary %}<span class="badge-admin badge-completed">Primary</span>{% endif %}</td>
+          <td style="font-size:0.78rem;color:#6c8c88;">{{ acc.opened_at|date:"d M Y" }}</td>
+          <td><a href="{% url 'admin_panel:account_detail' acc.id %}" class="btn-admin-primary btn-admin-sm"><i class="fas fa-eye"></i> Manage</a></td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="7" class="text-center py-3 text-muted">No accounts</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Loans -->
+{% if loans %}
+<div class="panel-card mb-3">
+  <div class="panel-card-header">
+    <span class="panel-card-title"><i class="fas fa-hand-holding-usd me-2 text-warning"></i>Loan Applications</span>
+  </div>
+  <div style="overflow-x:auto;">
+    <table class="admin-table">
+      <thead><tr><th>Type</th><th>Requested</th><th>Status</th><th>Applied</th><th>Action</th></tr></thead>
+      <tbody>
+        {% for loan in loans %}
+        <tr>
+          <td>{{ loan.get_loan_type_display }}</td>
+          <td>৳{{ loan.requested_amount|floatformat:0|intcomma }}</td>
+          <td><span class="badge-admin badge-{{ loan.status|lower }}">{{ loan.get_status_display }}</span></td>
+          <td style="font-size:0.78rem;color:#6c8c88;">{{ loan.applied_at|date:"d M Y" }}</td>
+          <td><a href="{% url 'admin_panel:loan_detail' loan.id %}" class="btn-admin-primary btn-admin-sm">Review</a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+
+<!-- Recent Transactions -->
+<div class="panel-card mb-3">
+  <div class="panel-card-header">
+    <span class="panel-card-title"><i class="fas fa-exchange-alt me-2 text-warning"></i>Recent Transactions</span>
+  </div>
+  <div style="overflow-x:auto;">
+    <table class="admin-table">
+      <thead><tr><th>Reference</th><th>Type</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead>
+      <tbody>
+        {% for txn in transactions %}
+        <tr>
+          <td style="font-family:monospace;font-size:0.78rem;color:#6c8c88;">{{ txn.reference_number }}</td>
+          <td style="font-size:0.82rem;">{{ txn.get_transaction_type_display }}</td>
+          <td class="fw-semibold">৳{{ txn.amount|floatformat:2|intcomma }}</td>
+          <td><span class="badge-admin badge-{{ txn.status|lower }}">{{ txn.get_status_display }}</span></td>
+          <td style="font-size:0.78rem;color:#6c8c88;">{{ txn.created_at|date:"d M Y H:i" }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5" class="text-center py-3 text-muted">No transactions</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Audit Log -->
+<div class="panel-card">
+  <div class="panel-card-header">
+    <span class="panel-card-title"><i class="fas fa-history me-2 text-warning"></i>Audit Log</span>
+  </div>
+  <div style="overflow-x:auto;">
+    <table class="admin-table">
+      <thead><tr><th>Action</th><th>Description</th><th>IP</th><th>Time</th></tr></thead>
+      <tbody>
+        {% for log in audit %}
+        <tr>
+          <td><span class="badge-admin badge-active" style="font-size:0.68rem;">{{ log.action }}</span></td>
+          <td style="font-size:0.82rem;">{{ log.description|truncatechars:60 }}</td>
+          <td style="font-family:monospace;font-size:0.78rem;color:#6c8c88;">{{ log.ip_address|default:"—" }}</td>
+          <td style="font-size:0.78rem;color:#6c8c88;">{{ log.created_at|date:"d M Y H:i" }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="4" class="text-center py-3 text-muted">No audit records</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

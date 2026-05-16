@@ -1,0 +1,132 @@
+{% extends 'banking/base.html' %}
+{% load humanize %}
+{% block title %}X Bank | Deposit{% endblock %}
+{% block content %}
+<div class="container py-4"><div class="row justify-content-center"><div class="col-lg-7">
+<div class="card-bank">
+  <div class="card-header-bank"><i class="fas fa-arrow-down fa-2x mb-2"></i><h3>Deposit Funds</h3><p class="mb-0 opacity-75">Add money securely · OTP confirmed</p></div>
+  <div class="p-4 p-md-5">
+    <form method="post" novalidate>{% csrf_token %}
+      <div class="mb-4">
+        <label class="form-label fw-semibold">Select Account</label>
+        <div class="input-group-bank">
+          <i class="fas fa-university input-icon"></i>
+          <select name="account" class="form-control form-control-bank" required>
+            {% for acc in form.account.field.queryset %}
+            <option value="{{ acc.pk }}">{{ acc.account_number }} — ৳{{ acc.balance|floatformat:2|intcomma }} ({{ acc.account_type }})</option>
+            {% empty %}<option value="">No active accounts</option>{% endfor %}
+          </select>
+        </div>
+      </div>
+
+      <div class="mb-4">
+        <label class="form-label fw-semibold">Payment Method</label>
+        <div class="row g-2">
+          <div class="col-4">
+            <label class="meth-lbl d-block text-center border rounded-3 p-3" style="cursor:pointer;border-color:#27ae60 !important;background:rgba(39,174,96,.05);">
+              <input type="radio" name="payment_method" value="BANK_TRANSFER" class="d-none" checked>
+              <i class="fas fa-university fa-xl text-success d-block mb-1"></i><small class="fw-semibold">Bank Transfer</small>
+            </label>
+          </div>
+          <div class="col-4">
+            <label class="meth-lbl d-block text-center border rounded-3 p-3" style="cursor:pointer;" id="cardLabel">
+              <input type="radio" name="payment_method" value="CARD" class="d-none">
+              <i class="fas fa-credit-card fa-xl text-primary d-block mb-1"></i><small class="fw-semibold">Card</small>
+            </label>
+          </div>
+          <div class="col-4">
+            <label class="meth-lbl d-block text-center border rounded-3 p-3" style="cursor:pointer;">
+              <input type="radio" name="payment_method" value="MOBILE" class="d-none">
+              <i class="fas fa-mobile-alt fa-xl text-warning d-block mb-1"></i><small class="fw-semibold">Mobile</small>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div id="cardSection" style="display:none;" class="border rounded-3 p-4 mb-4" style="background:#f8f9fa;">
+        <h6 class="fw-bold mb-3"><i class="fas fa-credit-card me-2 text-primary"></i>Card Details</h6>
+        <div class="mb-3">
+          <label class="form-label small fw-semibold">Card Number</label>
+          <input type="text" name="card_number" id="cardNum" class="form-control" placeholder="1234 5678 9012 3456" maxlength="19" inputmode="numeric">
+          <small id="cardNet" class="text-muted"></small>
+        </div>
+        <div class="mb-3">
+          <label class="form-label small fw-semibold">Name on Card</label>
+          <input type="text" name="card_name" class="form-control" placeholder="Cardholder Name">
+        </div>
+        <div class="row g-3">
+          <div class="col-6">
+            <label class="form-label small fw-semibold">Expiry (MM/YY)</label>
+            <input type="text" name="card_expiry" id="cardExp" class="form-control" placeholder="MM/YY" maxlength="5">
+          </div>
+          <div class="col-6">
+            <label class="form-label small fw-semibold">CVV</label>
+            <input type="password" name="card_cvv" class="form-control" placeholder="•••" maxlength="4">
+          </div>
+        </div>
+        <p class="text-muted small mt-3 mb-0"><i class="fas fa-lock me-1 text-success"></i>Card details encrypted. CVV never stored.</p>
+      </div>
+
+      <div class="mb-4">
+        <label class="form-label fw-semibold">Amount (BDT)</label>
+        <div class="input-group-bank">
+          <i class="fas fa-coins input-icon"></i>
+          <input type="number" name="amount" id="amtInput" class="form-control form-control-bank" placeholder="Enter amount" step="0.01" min="10" required>
+        </div>
+        <div class="d-flex gap-2 mt-2 flex-wrap">
+          <button type="button" class="btn btn-sm btn-outline-success qamt" data-a="500">৳500</button>
+          <button type="button" class="btn btn-sm btn-outline-success qamt" data-a="1000">৳1,000</button>
+          <button type="button" class="btn btn-sm btn-outline-success qamt" data-a="2000">৳2,000</button>
+          <button type="button" class="btn btn-sm btn-outline-success qamt" data-a="5000">৳5,000</button>
+          <button type="button" class="btn btn-sm btn-outline-success qamt" data-a="10000">৳10,000</button>
+          <button type="button" class="btn btn-sm btn-outline-success qamt" data-a="25000">৳25,000</button>
+        </div>
+      </div>
+
+      <div class="mb-4">
+        <label class="form-label fw-semibold">Reference Note <span class="text-muted fw-normal">(optional)</span></label>
+        <div class="input-group-bank">
+          <i class="fas fa-pen input-icon"></i>
+          <input type="text" name="note" class="form-control form-control-bank" placeholder="e.g. Salary, personal savings...">
+        </div>
+      </div>
+
+      <div class="alert alert-warning rounded-3 mb-4">
+        <i class="fas fa-shield-alt me-2"></i>An <strong>OTP will be sent to your email</strong> to confirm this deposit.
+      </div>
+      <button type="submit" class="btn btn-primary-bank w-100"><i class="fas fa-arrow-down me-2"></i>Deposit Now</button>
+    </form>
+  </div>
+</div>
+</div></div></div>
+{% endblock %}
+{% block extra_js %}
+<script>
+const methLabels = document.querySelectorAll('.meth-lbl');
+methLabels.forEach(l => {
+  l.addEventListener('click', function() {
+    methLabels.forEach(x => { x.style.borderColor = '#dee2e6'; x.style.background = ''; });
+    this.style.borderColor = '#FFC857'; this.style.background = 'rgba(255,200,87,.06)';
+    const radio = this.querySelector('input[type=radio]');
+    document.getElementById('cardSection').style.display = radio.value === 'CARD' ? 'block' : 'none';
+  });
+});
+document.getElementById('cardNum').addEventListener('input', function() {
+  let v = this.value.replace(/\D/g,'').slice(0,16);
+  this.value = v.match(/.{1,4}/g)?.join(' ') || v;
+  const n = document.getElementById('cardNet');
+  if (v.startsWith('4')) n.innerHTML = '<i class="fas fa-credit-card text-primary"></i> VISA';
+  else if (/^5[1-5]/.test(v)) n.innerHTML = '<i class="fas fa-credit-card text-danger"></i> Mastercard';
+  else if (/^3[47]/.test(v)) n.innerHTML = '<i class="fas fa-credit-card text-success"></i> Amex';
+  else n.textContent = '';
+});
+document.getElementById('cardExp').addEventListener('input', function() {
+  let v = this.value.replace(/\D/g,'');
+  if (v.length >= 3) v = v.slice(0,2)+'/'+v.slice(2,4);
+  this.value = v;
+});
+document.querySelectorAll('.qamt').forEach(b => b.addEventListener('click', function() {
+  document.getElementById('amtInput').value = this.dataset.a;
+}));
+</script>
+{% endblock %}

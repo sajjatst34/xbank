@@ -1,0 +1,49 @@
+{% extends 'admin_panel/base.html' %}
+{% block title %}KYC Pending — X Bank Admin{% endblock %}
+{% block page_title %}KYC Verification{% endblock %}
+{% block page_subtitle %}Users awaiting identity verification{% endblock %}
+
+{% block content %}
+<div class="panel-card">
+  <div class="panel-card-header">
+    <span class="panel-card-title"><i class="fas fa-id-card me-2 text-warning"></i>Pending KYC Requests ({{ page_obj.paginator.count }})</span>
+  </div>
+  <div style="overflow-x:auto;">
+    <table class="admin-table">
+      <thead>
+        <tr><th>User</th><th>ID Type</th><th>ID Number</th><th>Registered</th><th>Action</th></tr>
+      </thead>
+      <tbody>
+        {% for u in page_obj %}
+        <tr>
+          <td>
+            <div class="fw-semibold" style="font-size:0.875rem;">{{ u.get_full_name|default:u.username }}</div>
+            <div style="font-size:0.75rem;color:#6c8c88;">{{ u.email }}</div>
+          </td>
+          <td>{{ u.get_id_type_display|default:"—" }}</td>
+          <td style="font-family:monospace;font-size:0.85rem;">{{ u.id_number|default:"—" }}</td>
+          <td style="font-size:0.78rem;color:#6c8c88;">{{ u.date_joined|date:"d M Y" }}</td>
+          <td>
+            <a href="{% url 'admin_panel:user_detail' u.id %}" class="btn-admin-success btn-admin-sm"><i class="fas fa-check"></i> Review & Verify</a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="5" class="text-center py-5 text-muted">
+            <i class="fas fa-check-circle fa-2x mb-2 d-block" style="color:#27ae60;opacity:0.5;"></i>
+            All users are KYC verified!
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% if page_obj.has_other_pages %}
+  <div class="panel-card-body d-flex justify-content-center gap-2 pt-3" style="border-top:1px solid #f0f4f3;">
+    {% if page_obj.has_previous %}<a href="?page={{ page_obj.previous_page_number }}" class="btn-admin-primary btn-admin-sm">« Prev</a>{% endif %}
+    <span style="padding:0.3rem 0.8rem;font-size:0.82rem;color:#6c8c88;">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+    {% if page_obj.has_next %}<a href="?page={{ page_obj.next_page_number }}" class="btn-admin-primary btn-admin-sm">Next »</a>{% endif %}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

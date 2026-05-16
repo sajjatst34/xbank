@@ -1,0 +1,220 @@
+{% extends 'banking/base.html' %}
+{% block title %}X Bank | Register{% endblock %}
+{% block content %}
+<div class="container py-4">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="card-bank">
+        <div class="card-header-bank">
+          <i class="fas fa-user-plus fa-2x mb-2"></i>
+          <h3 class="fw-bold">Open Your Account</h3>
+          <p class="mb-0 opacity-75">Free account · Takes 2 minutes · OTP verified</p>
+        </div>
+        <div class="p-4 p-md-5">
+          <form method="post" novalidate>
+            {% csrf_token %}
+            {% if form.non_field_errors %}
+            <div class="alert alert-danger rounded-3">{{ form.non_field_errors.0 }}</div>
+            {% endif %}
+
+            <h6 class="fw-bold text-muted mb-3 border-bottom pb-2"><i class="fas fa-user me-2"></i>Personal Info</h6>
+            <div class="row g-3 mb-4">
+              <div class="col-md-6">
+                <label class="form-label fw-semibold small">First Name *</label>
+                <div class="input-group-bank">
+                  <i class="fas fa-user input-icon"></i>
+                  <input type="text" name="first_name" class="form-control form-control-bank" placeholder="First Name" value="{{ form.first_name.value|default:'' }}" required>
+                </div>
+                {% if form.first_name.errors %}<p class="text-danger small">{{ form.first_name.errors.0 }}</p>{% endif %}
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold small">Last Name *</label>
+                <div class="input-group-bank">
+                  <i class="fas fa-user input-icon"></i>
+                  <input type="text" name="last_name" class="form-control form-control-bank" placeholder="Last Name" value="{{ form.last_name.value|default:'' }}" required>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold small">Username *</label>
+                <div class="input-group-bank">
+                  <i class="fas fa-at input-icon"></i>
+                  <input type="text" name="username" class="form-control form-control-bank" placeholder="Min 5 characters" value="{{ form.username.value|default:'' }}" required>
+                </div>
+                {% if form.username.errors %}<p class="text-danger small">{{ form.username.errors.0 }}</p>{% endif %}
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold small">Email Address *</label>
+                <div class="input-group-bank">
+                  <i class="fas fa-envelope input-icon"></i>
+                  <input type="email" name="email" class="form-control form-control-bank" placeholder="your@email.com" value="{{ form.email.value|default:'' }}" required>
+                </div>
+                {% if form.email.errors %}<p class="text-danger small">{{ form.email.errors.0 }}</p>{% endif %}
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold small">Phone *</label>
+                <div class="input-group-bank">
+                  <i class="fas fa-phone input-icon"></i>
+                  <input type="tel" name="phone" class="form-control form-control-bank" placeholder="+8801XXXXXXXXX" value="{{ form.phone.value|default:'' }}" required>
+                </div>
+                {% if form.phone.errors %}<p class="text-danger small">{{ form.phone.errors.0 }}</p>{% endif %}
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold small">Date of Birth *</label>
+                <div class="input-group-bank">
+                  <i class="fas fa-calendar input-icon"></i>
+                  <input type="date" name="date_of_birth" class="form-control form-control-bank" value="{{ form.date_of_birth.value|default:'' }}" required>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold small">Gender</label>
+                <div class="input-group-bank">
+                  <i class="fas fa-venus-mars input-icon"></i>
+                  <select name="gender" class="form-control form-control-bank">
+                    <option value="">Select Gender</option>
+                    <option value="M">Male</option>
+                    <option value="F">Female</option>
+                    <option value="O">Other</option>
+                  </select>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold small">City</label>
+                <div class="input-group-bank">
+                  <i class="fas fa-city input-icon"></i>
+                  <input type="text" name="city" class="form-control form-control-bank" placeholder="Your city" value="{{ form.city.value|default:'' }}">
+                </div>
+              </div>
+              <div class="col-12">
+                <label class="form-label fw-semibold small">Address</label>
+                <div class="input-group-bank">
+                  <i class="fas fa-map-marker-alt input-icon" style="top:18px;transform:none;"></i>
+                  <textarea name="address" class="form-control form-control-bank" rows="2" placeholder="Full address" style="padding-top:.8rem;height:auto;">{{ form.address.value|default:'' }}</textarea>
+                </div>
+              </div>
+            </div>
+
+            <h6 class="fw-bold text-muted mb-3 border-bottom pb-2"><i class="fas fa-id-card me-2"></i>Identity Verification</h6>
+            <div class="row g-3 mb-4">
+              <div class="col-md-6">
+                <label class="form-label fw-semibold small">ID Type *</label>
+                <div class="input-group-bank">
+                  <i class="fas fa-id-badge input-icon"></i>
+                  <select name="id_type" class="form-control form-control-bank" required>
+                    <option value="">Select ID Type</option>
+                    <option value="NID">National ID (NID)</option>
+                    <option value="PASSPORT">Passport</option>
+                    <option value="DRIVING">Driving License</option>
+                  </select>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold small">ID Number *</label>
+                <div class="input-group-bank">
+                  <i class="fas fa-hashtag input-icon"></i>
+                  <input type="text" name="id_number" class="form-control form-control-bank" placeholder="Your ID number" required>
+                </div>
+              </div>
+            </div>
+
+            <h6 class="fw-bold text-muted mb-3 border-bottom pb-2"><i class="fas fa-university me-2"></i>Account Type</h6>
+            <div class="row g-2 mb-4">
+              <div class="col-6 col-md-3">
+                <label class="acc-type-lbl d-block text-center border rounded-3 p-3" style="cursor:pointer;border-color:#27ae60 !important;background:rgba(39,174,96,.05);">
+                  <input type="radio" name="account_type" value="SAVINGS" class="d-none" checked>
+                  <i class="fas fa-piggy-bank fa-2x text-success mb-1 d-block"></i>
+                  <small class="fw-semibold">Savings</small>
+                </label>
+              </div>
+              <div class="col-6 col-md-3">
+                <label class="acc-type-lbl d-block text-center border rounded-3 p-3" style="cursor:pointer;">
+                  <input type="radio" name="account_type" value="CURRENT" class="d-none">
+                  <i class="fas fa-exchange-alt fa-2x text-primary mb-1 d-block"></i>
+                  <small class="fw-semibold">Current</small>
+                </label>
+              </div>
+              <div class="col-6 col-md-3">
+                <label class="acc-type-lbl d-block text-center border rounded-3 p-3" style="cursor:pointer;">
+                  <input type="radio" name="account_type" value="SALARY" class="d-none">
+                  <i class="fas fa-briefcase fa-2x text-warning mb-1 d-block"></i>
+                  <small class="fw-semibold">Salary</small>
+                </label>
+              </div>
+              <div class="col-6 col-md-3">
+                <label class="acc-type-lbl d-block text-center border rounded-3 p-3" style="cursor:pointer;">
+                  <input type="radio" name="account_type" value="STUDENT" class="d-none">
+                  <i class="fas fa-graduation-cap fa-2x text-info mb-1 d-block"></i>
+                  <small class="fw-semibold">Student</small>
+                </label>
+              </div>
+            </div>
+
+            <h6 class="fw-bold text-muted mb-3 border-bottom pb-2"><i class="fas fa-lock me-2"></i>Set Password</h6>
+            <div class="row g-3 mb-4">
+              <div class="col-md-6">
+                <label class="form-label fw-semibold small">Password *</label>
+                <div class="input-group-bank">
+                  <i class="fas fa-lock input-icon"></i>
+                  <input type="password" name="password1" id="pwd1" class="form-control form-control-bank" placeholder="Min 8 characters" required>
+                </div>
+                <div id="strengthBar" style="height:4px;border-radius:2px;background:#eee;margin-top:4px;display:none;">
+                  <div id="strengthFill" style="height:100%;border-radius:2px;transition:.3s;width:0%;"></div>
+                </div>
+                <small id="strengthLabel" class="text-muted"></small>
+                {% if form.password1.errors %}<p class="text-danger small">{{ form.password1.errors.0 }}</p>{% endif %}
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold small">Confirm Password *</label>
+                <div class="input-group-bank">
+                  <i class="fas fa-lock input-icon"></i>
+                  <input type="password" name="password2" class="form-control form-control-bank" placeholder="Repeat password" required>
+                </div>
+                {% if form.password2.errors %}<p class="text-danger small">{{ form.password2.errors.0 }}</p>{% endif %}
+              </div>
+            </div>
+
+            <div class="form-check mb-4">
+              <input class="form-check-input" type="checkbox" name="terms" id="termsChk" required>
+              <label class="form-check-label small" for="termsChk">
+                I agree to the <a href="#" class="text-success fw-semibold">Terms & Conditions</a> and <a href="#" class="text-success fw-semibold">Privacy Policy</a>
+              </label>
+            </div>
+
+            <button type="submit" class="btn btn-primary-bank w-100">
+              <i class="fas fa-user-plus me-2"></i>Create My Account
+            </button>
+            <p class="text-center mt-3 text-muted small">
+              Already have an account? <a href="{% url 'banking:login' %}" class="text-success fw-semibold text-decoration-none">Login here</a>
+            </p>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+// Account type cards
+document.querySelectorAll('.acc-type-lbl').forEach(lbl => {
+  lbl.addEventListener('click', function() {
+    document.querySelectorAll('.acc-type-lbl').forEach(l => {
+      l.style.borderColor = '#dee2e6'; l.style.background = '';
+    });
+    this.style.borderColor = '#FFC857'; this.style.background = 'rgba(255,200,87,.08)';
+  });
+});
+// Password strength
+document.getElementById('pwd1').addEventListener('input', function() {
+  const v = this.value; const bar = document.getElementById('strengthBar');
+  const fill = document.getElementById('strengthFill'); const lbl = document.getElementById('strengthLabel');
+  bar.style.display = 'block';
+  let s = 0;
+  if (v.length >= 8) s++; if (/[A-Z]/.test(v)) s++; if (/[0-9]/.test(v)) s++; if (/[^A-Za-z0-9]/.test(v)) s++;
+  const colors = ['#e74c3c','#e67e22','#f1c40f','#27ae60'];
+  const labels = ['Weak','Fair','Good','Strong'];
+  fill.style.width = (s*25)+'%'; fill.style.background = colors[s-1]||'#eee';
+  lbl.textContent = s>0 ? labels[s-1] : '';
+  lbl.style.color = colors[s-1]||'#999';
+});
+</script>
+{% endblock %}

@@ -1,0 +1,78 @@
+{% extends 'admin_panel/base.html' %}
+{% block title %}Audit Logs — X Bank Admin{% endblock %}
+{% block page_title %}Audit Logs{% endblock %}
+{% block page_subtitle %}Security activity trail for all users{% endblock %}
+
+{% block content %}
+<div class="panel-card">
+  <div class="panel-card-header">
+    <span class="panel-card-title"><i class="fas fa-shield-alt me-2 text-warning"></i>Audit Logs ({{ page_obj.paginator.count }})</span>
+  </div>
+  <div class="panel-card-body">
+    <form method="get" class="filter-bar mb-0">
+      <div class="search-bar" style="flex:1;min-width:200px;">
+        <i class="fas fa-search search-icon"></i>
+        <input type="text" name="q" value="{{ q }}" placeholder="Username, IP address, description…">
+      </div>
+      <select name="action" class="filter-select">
+        <option value="">All Actions</option>
+        {% for val, label in action_types %}
+        <option value="{{ val }}" {% if action_f == val %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+      <button type="submit" class="btn-admin-primary"><i class="fas fa-filter"></i> Filter</button>
+      <a href="{% url 'admin_panel:audit_logs' %}" class="btn-admin-primary" style="background:linear-gradient(95deg,#6c757d,#555);">Clear</a>
+    </form>
+  </div>
+  <div style="overflow-x:auto;">
+    <table class="admin-table">
+      <thead>
+        <tr><th>Time</th><th>User</th><th>Action</th><th>Description</th><th>IP Address</th></tr>
+      </thead>
+      <tbody>
+        {% for log in page_obj %}
+        <tr>
+          <td style="font-size:0.75rem;color:#6c8c88;white-space:nowrap;">{{ log.created_at|date:"d M Y H:i:s" }}</td>
+          <td>
+            {% if log.user %}
+              <a href="{% url 'admin_panel:user_detail' log.user.id %}" style="font-size:0.83rem;font-weight:600;color:var(--primary-light);text-decoration:none;">
+                {{ log.user.username }}
+              </a>
+            {% else %}
+              <span style="font-size:0.8rem;color:#6c8c88;">System</span>
+            {% endif %}
+          </td>
+          <td>
+            <span class="badge-admin
+              {% if log.action == 'LOGIN' %}badge-active
+              {% elif log.action == 'LOGOUT' %}badge-inactive
+              {% elif log.action == 'LOGIN_FAILED' or log.action == 'SUSPICIOUS' %}badge-rejected
+              {% elif log.action == 'TRANSACTION' %}badge-completed
+              {% elif log.action == 'PASSWORD_CHANGE' %}badge-pending
+              {% else %}badge-active{% endif %}"
+              style="font-size:0.68rem;">
+              {{ log.action }}
+            </span>
+          </td>
+          <td style="font-size:0.82rem;max-width:320px;">{{ log.description|truncatechars:80 }}</td>
+          <td style="font-family:monospace;font-size:0.78rem;color:#6c8c88;">{{ log.ip_address|default:"—" }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="5" class="text-center py-5 text-muted">
+            <i class="fas fa-shield-alt fa-2x mb-2 d-block opacity-25"></i>No audit logs found
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% if page_obj.has_other_pages %}
+  <div class="panel-card-body d-flex justify-content-center gap-2 pt-3" style="border-top:1px solid #f0f4f3;">
+    {% if page_obj.has_previous %}<a href="?page={{ page_obj.previous_page_number }}&q={{ q }}&action={{ action_f }}" class="btn-admin-primary btn-admin-sm">« Prev</a>{% endif %}
+    <span style="padding:0.3rem 0.8rem;font-size:0.82rem;color:#6c8c88;">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+    {% if page_obj.has_next %}<a href="?page={{ page_obj.next_page_number }}&q={{ q }}&action={{ action_f }}" class="btn-admin-primary btn-admin-sm">Next »</a>{% endif %}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

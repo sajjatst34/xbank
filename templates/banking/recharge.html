@@ -1,0 +1,51 @@
+{% extends 'banking/base.html' %}
+{% load humanize %}
+{% block title %}X Bank | Mobile Recharge{% endblock %}
+{% block content %}
+<div class="container py-4"><div class="row justify-content-center"><div class="col-lg-7">
+<div class="card-bank">
+  <div class="card-header-bank"><i class="fas fa-mobile-alt fa-2x mb-2"></i><h3>Mobile Recharge</h3><p class="mb-0 opacity-75">Instant top-up for all operators</p></div>
+  <div class="p-4 p-md-5"><form method="post" novalidate>{% csrf_token %}
+    <div class="mb-4"><label class="form-label fw-semibold">From Account</label>
+      <div class="input-group-bank"><i class="fas fa-university input-icon"></i>
+        <select name="account" class="form-control form-control-bank" required>
+          {% for acc in form.account.field.queryset %}
+          <option value="{{ acc.pk }}">{{ acc.account_number }} — ৳{{ acc.balance|floatformat:2|intcomma }}</option>
+          {% empty %}<option value="">No active accounts</option>{% endfor %}
+        </select></div></div>
+    <div class="mb-4"><label class="form-label fw-semibold">Mobile Number</label>
+      <div class="input-group-bank"><i class="fas fa-phone input-icon"></i>
+        <input type="tel" name="mobile_number" class="form-control form-control-bank" placeholder="01XXXXXXXXX" inputmode="tel" required></div></div>
+    <div class="row g-3 mb-4">
+      <div class="col-md-6"><label class="form-label fw-semibold">Operator</label>
+        <div class="input-group-bank"><i class="fas fa-signal input-icon"></i>
+          <select name="operator" class="form-control form-control-bank">
+            <option value="GRAMEENPHONE">📱 Grameenphone (GP)</option>
+            <option value="ROBI">📱 Robi</option>
+            <option value="BANGLALINK">📱 Banglalink</option>
+            <option value="AIRTEL">📱 Airtel</option>
+            <option value="TELETALK">📱 Teletalk</option>
+          </select></div></div>
+      <div class="col-md-6"><label class="form-label fw-semibold">Type</label>
+        <div class="input-group-bank"><i class="fas fa-sim-card input-icon"></i>
+          <select name="recharge_type" class="form-control form-control-bank">
+            <option value="PREPAID">Prepaid</option>
+            <option value="POSTPAID">Postpaid</option>
+          </select></div></div>
+    </div>
+    <div class="mb-4"><label class="form-label fw-semibold">Recharge Amount (৳10–৳2,000)</label>
+      <div class="input-group-bank"><i class="fas fa-coins input-icon"></i>
+        <input type="number" name="amount" id="amtInput" class="form-control form-control-bank" placeholder="Amount" min="10" max="2000" step="1" required></div>
+      <div class="d-flex gap-2 mt-2 flex-wrap">
+        <button type="button" class="btn btn-sm btn-outline-success qamt" data-a="20">৳20</button>
+        <button type="button" class="btn btn-sm btn-outline-success qamt" data-a="50">৳50</button>
+        <button type="button" class="btn btn-sm btn-outline-success qamt" data-a="100">৳100</button>
+        <button type="button" class="btn btn-sm btn-outline-success qamt" data-a="200">৳200</button>
+        <button type="button" class="btn btn-sm btn-outline-success qamt" data-a="500">৳500</button>
+      </div></div>
+    <div class="alert alert-warning rounded-3 mb-4"><i class="fas fa-shield-alt me-2"></i>OTP required to confirm recharge.</div>
+    <button type="submit" class="btn btn-primary-bank w-100"><i class="fas fa-mobile-alt me-2"></i>Recharge Now</button>
+  </form></div></div>
+</div></div></div>
+{% endblock %}
+{% block extra_js %}<script>document.querySelectorAll('.qamt').forEach(b=>b.addEventListener('click',function(){document.getElementById('amtInput').value=this.dataset.a;}));</script>{% endblock %}

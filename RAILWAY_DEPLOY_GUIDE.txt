@@ -1,0 +1,65 @@
+# Railway Deployment Guide (Django XBank)
+
+## Step 1: Create GitHub Repository
+1. Open GitHub
+2. Create new repository
+3. Upload all project files
+
+## Step 2: Create Railway Account
+1. Go to https://railway.app
+2. Login with GitHub
+
+## Step 3: New Project
+1. Click "New Project"
+2. Select "Deploy from GitHub repo"
+3. Select your repository
+
+## Step 4: Add PostgreSQL Database
+1. Inside Railway project
+2. Click "New"
+3. Select "Database"
+4. Select "PostgreSQL"
+
+Railway automatically creates DATABASE_URL
+
+## Step 5: Add Environment Variables
+
+Go to Variables tab and add:
+
+SECRET_KEY=your-secret-key
+DEBUG=False
+ALLOWED_HOSTS=.up.railway.app
+EMAIL_HOST=smtp.gmail.com
+EMAIL_PORT=587
+EMAIL_HOST_USER=your-email@gmail.com
+EMAIL_HOST_PASSWORD=your-gmail-app-password
+
+## Step 6: Deploy
+
+Railway automatically runs:
+pip install -r requirements.txt
+
+## Step 7: Run Migration
+
+Open Railway terminal and run:
+
+python manage.py migrate
+
+## Step 8: Create Superuser
+
+python manage.py createsuperuser
+
+## Step 9: Collect Static Files
+
+python manage.py collectstatic --noinput
+
+## Step 10: Open Generated Domain
+
+Railway will generate:
+https://your-project.up.railway.app
+
+Add this domain into:
+ALLOWED_HOSTS
+CORS_ALLOWED_ORIGINS
+
+Project Ready.

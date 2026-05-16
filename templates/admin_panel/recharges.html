@@ -1,0 +1,68 @@
+{% extends 'admin_panel/base.html' %}
+{% load humanize %}
+{% block title %}Mobile Recharges — X Bank Admin{% endblock %}
+{% block page_title %}Mobile Recharges{% endblock %}
+{% block page_subtitle %}Total recharged: ৳{{ total|floatformat:2|intcomma }}{% endblock %}
+
+{% block content %}
+<div class="panel-card">
+  <div class="panel-card-header">
+    <span class="panel-card-title"><i class="fas fa-mobile-alt me-2 text-warning"></i>All Mobile Recharges ({{ page_obj.paginator.count }})</span>
+  </div>
+  <div class="panel-card-body">
+    <form method="get" class="filter-bar mb-0">
+      <div class="search-bar" style="flex:1;min-width:200px;">
+        <i class="fas fa-search search-icon"></i>
+        <input type="text" name="q" value="{{ q }}" placeholder="Mobile number…">
+      </div>
+      <select name="operator" class="filter-select">
+        <option value="">All Operators</option>
+        {% for val, label in operators %}
+        <option value="{{ val }}" {% if op_f == val %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+      <button type="submit" class="btn-admin-primary"><i class="fas fa-filter"></i> Filter</button>
+      <a href="{% url 'admin_panel:recharges' %}" class="btn-admin-primary" style="background:linear-gradient(95deg,#6c757d,#555);">Clear</a>
+    </form>
+  </div>
+  <div style="overflow-x:auto;">
+    <table class="admin-table">
+      <thead>
+        <tr><th>Mobile Number</th><th>Operator</th><th>Type</th><th>Account / User</th><th>Amount</th><th>Recharged At</th></tr>
+      </thead>
+      <tbody>
+        {% for r in page_obj %}
+        <tr>
+          <td style="font-family:monospace;font-size:0.9rem;font-weight:600;">{{ r.mobile_number }}</td>
+          <td>
+            <span style="font-size:0.78rem;padding:0.2rem 0.6rem;background:rgba(39,174,96,0.1);color:#27ae60;border-radius:20px;font-weight:600;">
+              {{ r.get_operator_display }}
+            </span>
+          </td>
+          <td style="font-size:0.82rem;">{{ r.get_recharge_type_display }}</td>
+          <td>
+            <div style="font-size:0.83rem;font-weight:600;">{{ r.account.account_number }}</div>
+            <div style="font-size:0.73rem;color:#6c8c88;">{{ r.account.user.get_full_name|default:r.account.user.username }}</div>
+          </td>
+          <td class="fw-bold" style="color:#e74c3c;">৳{{ r.amount|floatformat:2|intcomma }}</td>
+          <td style="font-size:0.78rem;color:#6c8c88;">{{ r.recharged_at|date:"d M Y H:i" }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="6" class="text-center py-5 text-muted">
+            <i class="fas fa-mobile-alt fa-2x mb-2 d-block opacity-25"></i>No recharges found
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% if page_obj.has_other_pages %}
+  <div class="panel-card-body d-flex justify-content-center gap-2 pt-3" style="border-top:1px solid #f0f4f3;">
+    {% if page_obj.has_previous %}<a href="?page={{ page_obj.previous_page_number }}&q={{ q }}&operator={{ op_f }}" class="btn-admin-primary btn-admin-sm">« Prev</a>{% endif %}
+    <span style="padding:0.3rem 0.8rem;font-size:0.82rem;color:#6c8c88;">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+    {% if page_obj.has_next %}<a href="?page={{ page_obj.next_page_number }}&q={{ q }}&operator={{ op_f }}" class="btn-admin-primary btn-admin-sm">Next »</a>{% endif %}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

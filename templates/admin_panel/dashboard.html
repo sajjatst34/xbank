@@ -1,0 +1,220 @@
+{% extends 'admin_panel/base.html' %}
+{% load humanize %}
+{% block title %}Dashboard — X Bank Admin{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+{% block page_subtitle %}Welcome back, {{ request.user.first_name|default:request.user.username }}!{% endblock %}
+
+{% block content %}
+<!-- Stats Row -->
+<div class="row g-3 mb-4">
+  <div class="col-6 col-lg-3">
+    <div class="stat-card">
+      <div class="d-flex align-items-center justify-content-between mb-2">
+        <div class="stat-icon blue"><i class="fas fa-users"></i></div>
+        <span class="stat-change up"><i class="fas fa-arrow-up me-1"></i>New</span>
+      </div>
+      <div class="stat-value">{{ total_users }}</div>
+      <div class="stat-label">Total Users</div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="stat-card">
+      <div class="d-flex align-items-center justify-content-between mb-2">
+        <div class="stat-icon green"><i class="fas fa-university"></i></div>
+      </div>
+      <div class="stat-value">৳{{ total_balance|floatformat:0|intcomma }}</div>
+      <div class="stat-label">Total Deposits (BDT)</div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="stat-card">
+      <div class="d-flex align-items-center justify-content-between mb-2">
+        <div class="stat-icon orange"><i class="fas fa-exchange-alt"></i></div>
+      </div>
+      <div class="stat-value">{{ total_transactions }}</div>
+      <div class="stat-label">Total Transactions</div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="stat-card">
+      <div class="d-flex align-items-center justify-content-between mb-2">
+        <div class="stat-icon red"><i class="fas fa-hand-holding-usd"></i></div>
+        {% if pending_loan_count %}<span class="nav-badge" style="background:#e74c3c;color:white;border-radius:20px;padding:1px 7px;font-size:0.68rem;font-weight:700;">{{ pending_loan_count }}</span>{% endif %}
+      </div>
+      <div class="stat-value">{{ total_loans }}</div>
+      <div class="stat-label">Loan Applications</div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="stat-card">
+      <div class="d-flex align-items-center justify-content-between mb-2">
+        <div class="stat-icon teal"><i class="fas fa-check-circle"></i></div>
+      </div>
+      <div class="stat-value">{{ verified_users }}</div>
+      <div class="stat-label">KYC Verified Users</div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="stat-card">
+      <div class="d-flex align-items-center justify-content-between mb-2">
+        <div class="stat-icon purple"><i class="fas fa-piggy-bank"></i></div>
+      </div>
+      <div class="stat-value">{{ total_savings }}</div>
+      <div class="stat-label">Active Savings Plans</div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="stat-card">
+      <div class="d-flex align-items-center justify-content-between mb-2">
+        <div class="stat-icon green"><i class="fas fa-mobile-alt"></i></div>
+      </div>
+      <div class="stat-value">{{ total_recharges }}</div>
+      <div class="stat-label">Mobile Recharges</div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="stat-card">
+      <div class="d-flex align-items-center justify-content-between mb-2">
+        <div class="stat-icon blue"><i class="fas fa-heart"></i></div>
+      </div>
+      <div class="stat-value">৳{{ total_donations|floatformat:0|intcomma }}</div>
+      <div class="stat-label">Total Donations (BDT)</div>
+    </div>
+  </div>
+</div>
+
+<!-- Quick Actions + Pending Items -->
+<div class="row g-3 mb-4">
+  <div class="col-lg-4">
+    <div class="panel-card h-100">
+      <div class="panel-card-header">
+        <span class="panel-card-title"><i class="fas fa-bolt me-2 text-warning"></i>Quick Actions</span>
+      </div>
+      <div class="panel-card-body d-grid gap-2">
+        <a href="{% url 'admin_panel:users' %}" class="btn-admin-primary"><i class="fas fa-users"></i> Manage Users</a>
+        <a href="{% url 'admin_panel:loans' %}" class="btn-admin-accent"><i class="fas fa-hand-holding-usd"></i> Review Loans {% if pending_loan_count %}({{ pending_loan_count }}){% endif %}</a>
+        <a href="{% url 'admin_panel:kyc_pending' %}" class="btn-admin-primary" style="background: linear-gradient(95deg,#8e44ad,#6c3483);"><i class="fas fa-id-card"></i> KYC Pending {% if pending_kyc_count %}({{ pending_kyc_count }}){% endif %}</a>
+        <a href="{% url 'admin_panel:transactions' %}" class="btn-admin-primary" style="background: linear-gradient(95deg,#2980b9,#1a5f8a);"><i class="fas fa-exchange-alt"></i> All Transactions</a>
+        <a href="{% url 'admin_panel:audit_logs' %}" class="btn-admin-primary" style="background: linear-gradient(95deg,#e74c3c,#c0392b);"><i class="fas fa-shield-alt"></i> Audit Logs</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-8">
+    <div class="panel-card h-100">
+      <div class="panel-card-header">
+        <span class="panel-card-title"><i class="fas fa-clock me-2 text-warning"></i>Pending Loan Applications</span>
+        <a href="{% url 'admin_panel:loans' %}" class="btn-admin-sm btn-admin-primary">View All</a>
+      </div>
+      <div style="overflow-x:auto;">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Applicant</th>
+              <th>Type</th>
+              <th>Amount</th>
+              <th>Applied</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for loan in pending_loans %}
+            <tr>
+              <td>
+                <div class="fw-semibold" style="font-size:0.85rem;">{{ loan.user.get_full_name|default:loan.user.username }}</div>
+                <div class="text-muted" style="font-size:0.75rem;">{{ loan.user.email }}</div>
+              </td>
+              <td><span class="badge-admin badge-pending">{{ loan.get_loan_type_display }}</span></td>
+              <td class="fw-semibold">৳{{ loan.requested_amount|floatformat:0|intcomma }}</td>
+              <td style="font-size:0.78rem;color:#6c8c88;">{{ loan.applied_at|date:"d M Y" }}</td>
+              <td>
+                <a href="{% url 'admin_panel:loan_detail' loan.id %}" class="btn-admin-success btn-admin-sm"><i class="fas fa-eye"></i> Review</a>
+              </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="5" class="text-center text-muted py-4"><i class="fas fa-check-circle me-2 text-success"></i>No pending loans</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Recent Transactions + Recent Users -->
+<div class="row g-3">
+  <div class="col-lg-7">
+    <div class="panel-card">
+      <div class="panel-card-header">
+        <span class="panel-card-title"><i class="fas fa-exchange-alt me-2 text-warning"></i>Recent Transactions</span>
+        <a href="{% url 'admin_panel:transactions' %}" class="btn-admin-sm btn-admin-primary">View All</a>
+      </div>
+      <div style="overflow-x:auto;">
+        <table class="admin-table">
+          <thead>
+            <tr><th>Reference</th><th>Account</th><th>Type</th><th>Amount</th><th>Status</th></tr>
+          </thead>
+          <tbody>
+            {% for txn in recent_transactions %}
+            <tr>
+              <td style="font-size:0.78rem;font-family:monospace;color:#6c8c88;">{{ txn.reference_number }}</td>
+              <td style="font-size:0.8rem;">{{ txn.account.account_number }}</td>
+              <td><span style="font-size:0.78rem;color:#2980b9;">{{ txn.get_transaction_type_display }}</span></td>
+              <td class="fw-semibold" style="{% if txn.transaction_type in 'DEPOSIT,TRANSFER_IN,INTEREST' %}color:#27ae60{% else %}color:#e74c3c{% endif %}">৳{{ txn.amount|floatformat:2|intcomma }}</td>
+              <td>
+                <span class="badge-admin badge-{{ txn.status|lower }}">{{ txn.get_status_display }}</span>
+              </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="5" class="text-center text-muted py-4">No transactions yet</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-5">
+    <div class="panel-card">
+      <div class="panel-card-header">
+        <span class="panel-card-title"><i class="fas fa-user-plus me-2 text-warning"></i>Recent Users</span>
+        <a href="{% url 'admin_panel:users' %}" class="btn-admin-sm btn-admin-primary">View All</a>
+      </div>
+      <div style="overflow-x:auto;">
+        <table class="admin-table">
+          <thead>
+            <tr><th>User</th><th>Joined</th><th>KYC</th></tr>
+          </thead>
+          <tbody>
+            {% for u in recent_users %}
+            <tr>
+              <td>
+                <div class="d-flex align-items-center gap-2">
+                  <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#0A2E2A,#125B50);display:flex;align-items:center;justify-content:center;color:white;font-size:0.75rem;font-weight:700;flex-shrink:0;">
+                    {{ u.first_name|first|upper }}{{ u.last_name|first|upper }}
+                  </div>
+                  <div>
+                    <div style="font-size:0.82rem;font-weight:600;">{{ u.get_full_name|default:u.username }}</div>
+                    <div style="font-size:0.72rem;color:#6c8c88;">{{ u.email|truncatechars:22 }}</div>
+                  </div>
+                </div>
+              </td>
+              <td style="font-size:0.75rem;color:#6c8c88;">{{ u.date_joined|date:"d M" }}</td>
+              <td>
+                {% if u.is_kyc_verified %}
+                  <span class="badge-admin badge-approved" style="font-size:0.68rem;">✓ Verified</span>
+                {% else %}
+                  <span class="badge-admin badge-pending" style="font-size:0.68rem;">Pending</span>
+                {% endif %}
+              </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="3" class="text-center text-muted py-4">No users yet</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

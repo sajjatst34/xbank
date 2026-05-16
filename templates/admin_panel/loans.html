@@ -1,0 +1,75 @@
+{% extends 'admin_panel/base.html' %}
+{% load humanize %}
+{% block title %}Loans — X Bank Admin{% endblock %}
+{% block page_title %}Loan Applications{% endblock %}
+{% block page_subtitle %}{{ pending_count }} pending review{% endblock %}
+
+{% block content %}
+<div class="panel-card">
+  <div class="panel-card-header">
+    <span class="panel-card-title"><i class="fas fa-hand-holding-usd me-2 text-warning"></i>All Loan Applications ({{ page_obj.paginator.count }})</span>
+  </div>
+  <div class="panel-card-body">
+    <form method="get" class="filter-bar mb-0">
+      <div class="search-bar" style="flex:1;min-width:180px;">
+        <i class="fas fa-search search-icon"></i>
+        <input type="text" name="q" value="{{ q }}" placeholder="Username, email…">
+      </div>
+      <select name="status" class="filter-select">
+        <option value="">All Status</option>
+        {% for val, label in loan_statuses %}
+        <option value="{{ val }}" {% if status_f == val %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+      <select name="type" class="filter-select">
+        <option value="">All Types</option>
+        {% for val, label in loan_types %}
+        <option value="{{ val }}" {% if type_f == val %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+      <button type="submit" class="btn-admin-primary"><i class="fas fa-filter"></i> Filter</button>
+      <a href="{% url 'admin_panel:loans' %}" class="btn-admin-primary" style="background:linear-gradient(95deg,#6c757d,#555);">Clear</a>
+    </form>
+  </div>
+  <div style="overflow-x:auto;">
+    <table class="admin-table">
+      <thead>
+        <tr><th>App ID</th><th>Applicant</th><th>Type</th><th>Requested</th><th>Status</th><th>Applied</th><th>Action</th></tr>
+      </thead>
+      <tbody>
+        {% for loan in page_obj %}
+        <tr>
+          <td style="font-family:monospace;font-size:0.78rem;color:#6c8c88;">{{ loan.application_id|stringformat:"s"|truncatechars:10 }}</td>
+          <td>
+            <div style="font-weight:600;font-size:0.875rem;">{{ loan.user.get_full_name|default:loan.user.username }}</div>
+            <div style="font-size:0.75rem;color:#6c8c88;">{{ loan.user.email }}</div>
+          </td>
+          <td>{{ loan.get_loan_type_display }}</td>
+          <td class="fw-semibold">৳{{ loan.requested_amount|floatformat:0|intcomma }}</td>
+          <td>
+            <span class="badge-admin
+              {% if loan.status == 'APPROVED' or loan.status == 'DISBURSED' %}badge-approved
+              {% elif loan.status == 'REJECTED' %}badge-rejected
+              {% elif loan.status == 'SUBMITTED' %}badge-pending
+              {% else %}badge-inactive{% endif %}">
+              {{ loan.get_status_display }}
+            </span>
+          </td>
+          <td style="font-size:0.78rem;color:#6c8c88;">{{ loan.applied_at|date:"d M Y" }}</td>
+          <td><a href="{% url 'admin_panel:loan_detail' loan.id %}" class="btn-admin-primary btn-admin-sm"><i class="fas fa-eye"></i> Review</a></td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="7" class="text-center py-5 text-muted">No loan applications found</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% if page_obj.has_other_pages %}
+  <div class="panel-card-body d-flex justify-content-center gap-2 pt-3" style="border-top:1px solid #f0f4f3;">
+    {% if page_obj.has_previous %}<a href="?page={{ page_obj.previous_page_number }}&q={{ q }}&status={{ status_f }}&type={{ type_f }}" class="btn-admin-primary btn-admin-sm">« Prev</a>{% endif %}
+    <span style="padding:0.3rem 0.8rem;font-size:0.82rem;color:#6c8c88;">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+    {% if page_obj.has_next %}<a href="?page={{ page_obj.next_page_number }}&q={{ q }}&status={{ status_f }}&type={{ type_f }}" class="btn-admin-primary btn-admin-sm">Next »</a>{% endif %}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,93 @@
+{% extends 'admin_panel/base.html' %}
+{% load humanize %}
+{% block title %}Transaction {{ txn.reference_number }} — X Bank Admin{% endblock %}
+{% block page_title %}Transaction Detail{% endblock %}
+{% block page_subtitle %}{{ txn.reference_number }}{% endblock %}
+
+{% block content %}
+<div class="breadcrumb-admin">
+  <a href="{% url 'admin_panel:transactions' %}">Transactions</a>
+  <i class="fas fa-chevron-right" style="font-size:0.6rem;"></i>
+  <span>{{ txn.reference_number }}</span>
+</div>
+
+<div class="row g-3">
+  <div class="col-lg-6">
+    <div class="panel-card">
+      <div class="panel-card-header">
+        <span class="panel-card-title"><i class="fas fa-info-circle me-2 text-warning"></i>Transaction Info</span>
+        <span class="badge-admin badge-{{ txn.status|lower }}">{{ txn.get_status_display }}</span>
+      </div>
+      <div class="panel-card-body">
+        {% for label, val in txn_fields %}
+        <div class="d-flex justify-content-between py-2" style="font-size:0.85rem;border-bottom:1px solid #f0f4f3;">
+          <span style="color:#6c8c88;">{{ label }}</span><span class="fw-semibold">{{ val|default:"—" }}</span>
+        </div>
+        {% endfor %}
+        <div class="d-flex justify-content-between py-2" style="font-size:0.85rem;border-bottom:1px solid #f0f4f3;"><span style="color:#6c8c88;">Reference</span><span style="font-family:monospace;">{{ txn.reference_number }}</span></div>
+        <div class="d-flex justify-content-between py-2" style="font-size:0.85rem;border-bottom:1px solid #f0f4f3;"><span style="color:#6c8c88;">Type</span><span>{{ txn.get_transaction_type_display }}</span></div>
+        <div class="d-flex justify-content-between py-2" style="font-size:0.85rem;border-bottom:1px solid #f0f4f3;"><span style="color:#6c8c88;">Amount</span><span class="fw-bold" style="color:#27ae60;font-size:1.1rem;">৳{{ txn.amount|floatformat:2|intcomma }}</span></div>
+        <div class="d-flex justify-content-between py-2" style="font-size:0.85rem;border-bottom:1px solid #f0f4f3;"><span style="color:#6c8c88;">Fee</span><span>৳{{ txn.fee|floatformat:2 }}</span></div>
+        <div class="d-flex justify-content-between py-2" style="font-size:0.85rem;border-bottom:1px solid #f0f4f3;"><span style="color:#6c8c88;">Balance Before</span><span>৳{{ txn.balance_before|floatformat:2|intcomma }}</span></div>
+        <div class="d-flex justify-content-between py-2" style="font-size:0.85rem;border-bottom:1px solid #f0f4f3;"><span style="color:#6c8c88;">Balance After</span><span>৳{{ txn.balance_after|floatformat:2|intcomma }}</span></div>
+        <div class="d-flex justify-content-between py-2" style="font-size:0.85rem;border-bottom:1px solid #f0f4f3;"><span style="color:#6c8c88;">Payment Method</span><span>{{ txn.get_payment_method_display }}</span></div>
+        <div class="d-flex justify-content-between py-2" style="font-size:0.85rem;border-bottom:1px solid #f0f4f3;"><span style="color:#6c8c88;">Account</span><span><a href="{% url 'admin_panel:account_detail' txn.account.id %}" style="color:var(--primary-light);">{{ txn.account.account_number }}</a></span></div>
+        <div class="d-flex justify-content-between py-2" style="font-size:0.85rem;border-bottom:1px solid #f0f4f3;"><span style="color:#6c8c88;">Account Owner</span><span><a href="{% url 'admin_panel:user_detail' txn.account.user.id %}" style="color:var(--primary-light);">{{ txn.account.user.get_full_name|default:txn.account.user.username }}</a></span></div>
+        {% if txn.recipient_account_number %}
+        <div class="d-flex justify-content-between py-2" style="font-size:0.85rem;border-bottom:1px solid #f0f4f3;"><span style="color:#6c8c88;">Recipient Account</span><span style="font-family:monospace;">{{ txn.recipient_account_number }}</span></div>
+        <div class="d-flex justify-content-between py-2" style="font-size:0.85rem;border-bottom:1px solid #f0f4f3;"><span style="color:#6c8c88;">Recipient Name</span><span>{{ txn.recipient_name|default:"—" }}</span></div>
+        <div class="d-flex justify-content-between py-2" style="font-size:0.85rem;border-bottom:1px solid #f0f4f3;"><span style="color:#6c8c88;">Recipient Bank</span><span>{{ txn.recipient_bank|default:"—" }}</span></div>
+        {% endif %}
+        <div class="d-flex justify-content-between py-2" style="font-size:0.85rem;border-bottom:1px solid #f0f4f3;"><span style="color:#6c8c88;">IP Address</span><span style="font-family:monospace;">{{ txn.ip_address|default:"—" }}</span></div>
+        <div class="d-flex justify-content-between py-2" style="font-size:0.85rem;border-bottom:1px solid #f0f4f3;"><span style="color:#6c8c88;">Created</span><span>{{ txn.created_at|date:"d M Y H:i:s" }}</span></div>
+        {% if txn.completed_at %}
+        <div class="d-flex justify-content-between py-2" style="font-size:0.85rem;border-bottom:1px solid #f0f4f3;"><span style="color:#6c8c88;">Completed</span><span>{{ txn.completed_at|date:"d M Y H:i:s" }}</span></div>
+        {% endif %}
+        {% if txn.description %}
+        <div class="py-2" style="font-size:0.85rem;">
+          <span style="color:#6c8c88;">Description</span>
+          <div class="mt-1 p-2" style="background:#f8fafa;border-radius:8px;">{{ txn.description }}</div>
+        </div>
+        {% endif %}
+        {% if txn.note %}
+        <div class="py-2" style="font-size:0.85rem;">
+          <span style="color:#6c8c88;">Note</span>
+          <div class="mt-1 p-2" style="background:#f8fafa;border-radius:8px;">{{ txn.note }}</div>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-6">
+    <div class="panel-card">
+      <div class="panel-card-header">
+        <span class="panel-card-title"><i class="fas fa-tools me-2 text-warning"></i>Admin Actions</span>
+      </div>
+      <div class="panel-card-body">
+        {% if txn.status == 'COMPLETED' %}
+        <div class="alert-admin alert alert-warning mb-3" style="font-size:0.85rem;">
+          <i class="fas fa-exclamation-triangle me-2"></i>
+          Reversing this transaction will adjust the account balance and create a reversal entry.
+        </div>
+        <form method="post" onsubmit="return confirm('Reverse this transaction? This cannot be undone.')">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="reverse">
+          <button type="submit" class="btn-admin-danger">
+            <i class="fas fa-undo"></i> Reverse Transaction
+          </button>
+        </form>
+        {% elif txn.status == 'REVERSED' %}
+        <div class="alert-admin alert alert-info" style="font-size:0.85rem;">
+          <i class="fas fa-info-circle me-2"></i>This transaction has already been reversed.
+        </div>
+        {% else %}
+        <div class="alert-admin alert alert-info" style="font-size:0.85rem;">
+          <i class="fas fa-info-circle me-2"></i>No actions available for <strong>{{ txn.get_status_display }}</strong> transactions.
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

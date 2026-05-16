@@ -1,0 +1,49 @@
+{% extends 'banking/base.html' %}
+{% block title %}X Bank | Confirm Transaction{% endblock %}
+{% block content %}
+<div class="d-flex align-items-center justify-content-center" style="min-height:85vh;padding:1.5rem;">
+  <div style="width:100%;max-width:420px;">
+    <div class="card-bank-dark p-4 p-md-5 text-center">
+      <div class="mb-4">
+        <div style="width:80px;height:80px;background:linear-gradient(135deg,#FFC857,#FFA726);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;">
+          <i class="fas fa-shield-alt fa-2x text-dark"></i>
+        </div>
+        <h4 class="text-white fw-bold">Authorize Transaction</h4>
+        <p class="text-white-50 small">Enter the 6-digit OTP sent to your email to confirm this <strong class="text-white">{{ transaction_type|title }}</strong>.</p>
+        {% if amount %}
+        <div class="d-inline-block px-4 py-2 rounded-3 mb-2" style="background:rgba(255,200,87,.1);border:1px solid rgba(255,200,87,.3);">
+          <small class="text-white-50">Amount</small><br>
+          <span class="text-warning fw-bold fs-4">৳{{ amount }}</span>
+        </div>
+        {% endif %}
+      </div>
+      <form method="post">{% csrf_token %}
+        <input type="text" name="otp_code" id="otpIn"
+               class="form-control text-center fw-bold fs-2 mb-2"
+               style="letter-spacing:14px;border-radius:1rem;background:rgba(255,255,255,.1);border:2px solid rgba(255,200,87,.4);color:white;padding:1rem;"
+               placeholder="000000" maxlength="6" inputmode="numeric" autocomplete="off" autofocus required>
+        <p class="text-white-50 small">Expires in <span id="countdown" class="text-warning fw-bold">5:00</span></p>
+        {% if has_totp %}
+        <p class="text-white-50 small mb-3"><i class="fas fa-mobile-alt me-1 text-warning"></i>Or use your Google Authenticator app code.</p>
+        {% endif %}
+        <button type="submit" class="btn btn-primary-bank w-100 mb-3"><i class="fas fa-check-circle me-2"></i>Confirm & Authorize</button>
+      </form>
+      <div class="d-flex justify-content-between">
+        <a href="{% url 'banking:resend_otp' %}" class="text-warning small text-decoration-none"><i class="fas fa-redo me-1"></i>Resend OTP</a>
+        <a href="{% url 'banking:dashboard' %}" class="text-white-50 small text-decoration-none"><i class="fas fa-times me-1"></i>Cancel</a>
+      </div>
+      <div class="mt-4 p-3 rounded-3" style="background:rgba(231,76,60,.08);border:1px solid rgba(231,76,60,.2);">
+        <p class="text-white-50 small mb-0"><i class="fas fa-exclamation-triangle text-warning me-1"></i><strong class="text-white">Security:</strong> Never share your OTP. X Bank will never ask for it.</p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+document.getElementById('otpIn').addEventListener('input',function(){this.value=this.value.replace(/\D/g,'').slice(0,6);});
+let s=300;
+const el=document.getElementById('countdown');
+const t=setInterval(()=>{s--;const m=Math.floor(s/60);const sec=s%60;el.textContent=m+':'+String(sec).padStart(2,'0');if(s<=0){clearInterval(t);el.textContent='Expired';el.className='text-danger fw-bold';}},1000);
+</script>
+{% endblock %}

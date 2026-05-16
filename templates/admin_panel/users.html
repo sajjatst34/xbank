@@ -1,0 +1,103 @@
+{% extends 'admin_panel/base.html' %}
+{% block title %}Users — X Bank Admin{% endblock %}
+{% block page_title %}Users{% endblock %}
+{% block page_subtitle %}Manage all registered bank customers{% endblock %}
+
+{% block content %}
+<div class="panel-card mb-4">
+  <div class="panel-card-header">
+    <span class="panel-card-title"><i class="fas fa-users me-2 text-warning"></i>All Users ({{ page_obj.paginator.count }})</span>
+  </div>
+  <div class="panel-card-body">
+    <form method="get" class="filter-bar mb-0">
+      <div class="search-bar" style="flex:1;min-width:200px;">
+        <i class="fas fa-search search-icon"></i>
+        <input type="text" name="q" value="{{ q }}" placeholder="Search name, email, phone…">
+      </div>
+      <select name="status" class="filter-select">
+        <option value="">All Status</option>
+        <option value="active" {% if status_filter == 'active' %}selected{% endif %}>Active</option>
+        <option value="inactive" {% if status_filter == 'inactive' %}selected{% endif %}>Inactive</option>
+      </select>
+      <select name="kyc" class="filter-select">
+        <option value="">All KYC</option>
+        <option value="verified" {% if kyc_filter == 'verified' %}selected{% endif %}>KYC Verified</option>
+        <option value="unverified" {% if kyc_filter == 'unverified' %}selected{% endif %}>KYC Pending</option>
+      </select>
+      <button type="submit" class="btn-admin-primary"><i class="fas fa-filter"></i> Filter</button>
+      <a href="{% url 'admin_panel:users' %}" class="btn-admin-primary" style="background:linear-gradient(95deg,#6c757d,#555);">Clear</a>
+    </form>
+  </div>
+  <div style="overflow-x:auto;">
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>User</th>
+          <th>Phone</th>
+          <th>Joined</th>
+          <th>KYC</th>
+          <th>2FA</th>
+          <th>Status</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for u in page_obj %}
+        <tr>
+          <td style="color:#aaa;font-size:0.78rem;">{{ u.id }}</td>
+          <td>
+            <div class="d-flex align-items-center gap-2">
+              <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#0A2E2A,#125B50);display:flex;align-items:center;justify-content:center;color:white;font-size:0.8rem;font-weight:700;flex-shrink:0;">
+                {{ u.first_name|first|upper }}{{ u.last_name|first|upper }}
+              </div>
+              <div>
+                <div style="font-weight:600;font-size:0.875rem;">{{ u.get_full_name|default:u.username }}</div>
+                <div style="font-size:0.75rem;color:#6c8c88;">{{ u.email }}</div>
+              </div>
+            </div>
+          </td>
+          <td style="font-size:0.83rem;">{{ u.phone|default:"—" }}</td>
+          <td style="font-size:0.78rem;color:#6c8c88;">{{ u.date_joined|date:"d M Y" }}</td>
+          <td>
+            {% if u.is_kyc_verified %}
+              <span class="badge-admin badge-approved">✓ Verified</span>
+            {% else %}
+              <span class="badge-admin badge-pending">Pending</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if u.two_factor_enabled %}
+              <span class="badge-admin badge-active">ON</span>
+            {% else %}
+              <span class="badge-admin badge-inactive">OFF</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if u.is_active %}
+              <span class="badge-admin badge-active">Active</span>
+            {% else %}
+              <span class="badge-admin badge-inactive">Inactive</span>
+            {% endif %}
+          </td>
+          <td>
+            <a href="{% url 'admin_panel:user_detail' u.id %}" class="btn-admin-primary btn-admin-sm">
+              <i class="fas fa-eye"></i> View
+            </a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="8" class="text-center py-5 text-muted"><i class="fas fa-users fa-2x mb-2 d-block opacity-25"></i>No users found</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% if page_obj.has_other_pages %}
+  <div class="panel-card-body d-flex justify-content-center gap-2 pt-3" style="border-top:1px solid #f0f4f3;">
+    {% if page_obj.has_previous %}<a href="?page={{ page_obj.previous_page_number }}&q={{ q }}&status={{ status_filter }}&kyc={{ kyc_filter }}" class="btn-admin-primary btn-admin-sm">« Prev</a>{% endif %}
+    <span style="padding:0.3rem 0.8rem;font-size:0.82rem;color:#6c8c88;">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+    {% if page_obj.has_next %}<a href="?page={{ page_obj.next_page_number }}&q={{ q }}&status={{ status_filter }}&kyc={{ kyc_filter }}" class="btn-admin-primary btn-admin-sm">Next »</a>{% endif %}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

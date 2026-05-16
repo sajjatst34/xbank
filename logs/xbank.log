@@ -1,0 +1,2 @@
+ERROR 2026-04-28 02:25:34,630 utils Failed to send OTP email to sajjatst@gmail.com: (535, b'5.7.8 Username and Password not accepted. For more information, go to\n5.7.8  https://support.google.com/mail/?p=BadCredentials 41be03b00d2f7-c7fc35d9313sm109988a12.30 - gsmtp')
+ERROR 2026-04-28 02:47:42,976 utils Failed to send OTP email to sajjatst@gmail.com: (535, b'5.7.8 Username and Password not accepted. For more information, go to\n5.7.8  https://support.google.com/mail/?p=BadCredentials 41be03b00d2f7-c7fc35daa66sm146354a12.32 - gsmtp')

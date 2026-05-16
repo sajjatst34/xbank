@@ -1,0 +1,176 @@
+{% extends 'banking/base.html' %}
+{% load humanize %}
+{% block title %}X Bank | Dashboard{% endblock %}
+{% block content %}
+<div class="container-fluid py-4 px-3 px-md-4">
+
+  <div class="row align-items-center mb-4">
+    <div class="col">
+      <h4 class="text-white fw-bold mb-0"><i class="fas fa-hand-wave me-2 text-warning"></i>Welcome, <span class="text-warning">{{ user.first_name|default:user.username }}</span>!</h4>
+      <p class="text-white-50 small mb-0">Last login: {{ user.last_login|date:"d M Y H:i"|default:"First time" }}</p>
+    </div>
+    <div class="col-auto">
+      {% if not user.two_factor_enabled %}
+      <a href="{% url 'banking:setup_2fa' %}" class="btn btn-sm btn-warning fw-semibold"><i class="fas fa-shield-alt me-1"></i>Enable 2FA</a>
+      {% else %}
+      <span class="badge bg-success p-2"><i class="fas fa-shield-alt me-1"></i>2FA Active</span>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Balance Cards -->
+  <div class="row g-3 mb-4">
+    <div class="col-sm-6 col-lg-4">
+      <div class="balance-card">
+        <div class="d-flex justify-content-between align-items-start">
+          <div>
+            <p class="text-white-50 small mb-1">Total Balance</p>
+            <h3 class="fw-bold text-warning mb-0">৳{{ total_balance|floatformat:2|intcomma }}</h3>
+          </div>
+          <div style="background:rgba(255,255,255,.1);border-radius:50%;width:48px;height:48px;display:flex;align-items:center;justify-content:center;">
+            <i class="fas fa-wallet text-warning"></i>
+          </div>
+        </div>
+        <p class="text-white-50 small mt-2 mb-0">{{ accounts.count }} Account{{ accounts.count|pluralize }}</p>
+      </div>
+    </div>
+    <div class="col-sm-6 col-lg-4">
+      <div class="balance-card">
+        <div class="d-flex justify-content-between align-items-start">
+          <div>
+            <p class="text-white-50 small mb-1">Today's Spending</p>
+            <h3 class="fw-bold mb-0" style="color:#ff8f8f;">৳{{ today_spent|floatformat:2|intcomma }}</h3>
+          </div>
+          <div style="background:rgba(255,80,80,.15);border-radius:50%;width:48px;height:48px;display:flex;align-items:center;justify-content:center;">
+            <i class="fas fa-arrow-up" style="color:#ff8f8f;"></i>
+          </div>
+        </div>
+        <p class="text-white-50 small mt-2 mb-0">Daily limit: ৳5,00,000</p>
+      </div>
+    </div>
+    <div class="col-sm-6 col-lg-4">
+      <div class="balance-card">
+        <div class="d-flex justify-content-between align-items-start">
+          <div>
+            <p class="text-white-50 small mb-1">Active Products</p>
+            <h5 class="fw-bold text-success mb-0">{{ active_loans }} Loan{{ active_loans|pluralize }} · {{ active_savings }} Saving{{ active_savings|pluralize }}</h5>
+          </div>
+          <div style="background:rgba(39,174,96,.15);border-radius:50%;width:48px;height:48px;display:flex;align-items:center;justify-content:center;">
+            <i class="fas fa-chart-line text-success"></i>
+          </div>
+        </div>
+        <a href="{% url 'banking:savings' %}" class="text-white-50 small text-decoration-none mt-2 d-block">View savings →</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Account Cards -->
+  {% if accounts %}
+  <div class="row g-3 mb-4">
+    {% for account in accounts %}
+    <div class="col-md-6 col-xl-4">
+      <div class="p-4 text-white" style="background:linear-gradient(135deg,{% cycle '#1a3a5c,#2a5a8c' '#1a4a2a,#2a7a3a' '#3a1a5a,#6a2a9a' %});border-radius:1.4rem;position:relative;overflow:hidden;">
+        <div style="position:absolute;right:-15px;top:-15px;width:100px;height:100px;background:rgba(255,255,255,.05);border-radius:50%;"></div>
+        <div class="d-flex justify-content-between mb-3">
+          <div>
+            <span class="badge" style="background:rgba(255,255,255,.2);font-size:.7rem;">{{ account.account_type }}</span>
+            {% if account.is_primary %}<span class="badge bg-warning text-dark ms-1" style="font-size:.65rem;">PRIMARY</span>{% endif %}
+          </div>
+          <i class="fas fa-university opacity-50"></i>
+        </div>
+        <p class="small text-white-50 mb-1">Account Number</p>
+        <p class="fw-bold mb-3" style="font-family:monospace;letter-spacing:2px;font-size:1.05rem;">{{ account.account_number }}</p>
+        <div class="d-flex justify-content-between align-items-end">
+          <div>
+            <p class="small text-white-50 mb-0">Balance</p>
+            <h4 class="fw-bold text-warning mb-0">৳{{ account.balance|floatformat:2|intcomma }}</h4>
+          </div>
+          <span class="badge {% if account.status == 'ACTIVE' %}bg-success{% else %}bg-danger{% endif %}">{{ account.status }}</span>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <!-- Quick Actions -->
+  <div class="mb-4">
+    <h6 class="text-white fw-bold mb-3"><i class="fas fa-bolt me-2 text-warning"></i>Quick Actions</h6>
+    <div class="row g-2">
+      {% for icon, label, url_name in quick_actions %}
+      {% empty %}
+      <div class="col-4 col-md-2">
+        <a href="{% url 'banking:deposit' %}" class="d-block text-center text-decoration-none p-3 rounded-3" style="background:rgba(255,255,255,.1);transition:.2s;" onmouseover="this.style.background='rgba(255,200,87,.2)'" onmouseout="this.style.background='rgba(255,255,255,.1)'">
+          <i class="fas fa-arrow-down fa-xl text-success mb-2 d-block"></i><span class="text-white small">Deposit</span>
+        </a>
+      </div>
+      <div class="col-4 col-md-2">
+        <a href="{% url 'banking:withdraw' %}" class="d-block text-center text-decoration-none p-3 rounded-3" style="background:rgba(255,255,255,.1);transition:.2s;" onmouseover="this.style.background='rgba(255,200,87,.2)'" onmouseout="this.style.background='rgba(255,255,255,.1)'">
+          <i class="fas fa-arrow-up fa-xl text-warning mb-2 d-block"></i><span class="text-white small">Withdraw</span>
+        </a>
+      </div>
+      <div class="col-4 col-md-2">
+        <a href="{% url 'banking:payment' %}" class="d-block text-center text-decoration-none p-3 rounded-3" style="background:rgba(255,255,255,.1);transition:.2s;" onmouseover="this.style.background='rgba(255,200,87,.2)'" onmouseout="this.style.background='rgba(255,255,255,.1)'">
+          <i class="fas fa-credit-card fa-xl text-info mb-2 d-block"></i><span class="text-white small">Payment</span>
+        </a>
+      </div>
+      <div class="col-4 col-md-2">
+        <a href="{% url 'banking:bill_payment' %}" class="d-block text-center text-decoration-none p-3 rounded-3" style="background:rgba(255,255,255,.1);transition:.2s;" onmouseover="this.style.background='rgba(255,200,87,.2)'" onmouseout="this.style.background='rgba(255,255,255,.1)'">
+          <i class="fas fa-file-invoice-dollar fa-xl text-danger mb-2 d-block"></i><span class="text-white small">Bills</span>
+        </a>
+      </div>
+      <div class="col-4 col-md-2">
+        <a href="{% url 'banking:recharge' %}" class="d-block text-center text-decoration-none p-3 rounded-3" style="background:rgba(255,255,255,.1);transition:.2s;" onmouseover="this.style.background='rgba(255,200,87,.2)'" onmouseout="this.style.background='rgba(255,255,255,.1)'">
+          <i class="fas fa-mobile-alt fa-xl text-success mb-2 d-block"></i><span class="text-white small">Recharge</span>
+        </a>
+      </div>
+      <div class="col-4 col-md-2">
+        <a href="{% url 'banking:donation' %}" class="d-block text-center text-decoration-none p-3 rounded-3" style="background:rgba(255,255,255,.1);transition:.2s;" onmouseover="this.style.background='rgba(255,200,87,.2)'" onmouseout="this.style.background='rgba(255,255,255,.1)'">
+          <i class="fas fa-heart fa-xl text-danger mb-2 d-block"></i><span class="text-white small">Donate</span>
+        </a>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Recent Transactions -->
+  <div class="card-bank p-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h6 class="fw-bold mb-0"><i class="fas fa-history me-2 text-success"></i>Recent Transactions</h6>
+      <a href="{% url 'banking:transaction_history' %}" class="btn btn-sm btn-outline-success">View All</a>
+    </div>
+    {% if recent_transactions %}
+    <div class="table-responsive">
+      <table class="table table-hover align-middle small">
+        <thead class="table-light">
+          <tr><th>Reference</th><th>Type</th><th>Amount</th><th>Status</th><th>Date</th></tr>
+        </thead>
+        <tbody>
+          {% for txn in recent_transactions %}
+          <tr>
+            <td><code>{{ txn.reference_number }}</code></td>
+            <td><span class="badge bg-light text-dark" style="font-size:.72rem;">{{ txn.get_transaction_type_display }}</span></td>
+            <td>
+              {% if txn.transaction_type == 'DEPOSIT' or txn.transaction_type == 'TRANSFER_IN' or txn.transaction_type == 'INTEREST' or txn.transaction_type == 'LOAN_DISBURSEMENT' %}
+              <span class="text-success fw-bold">+৳{{ txn.amount|floatformat:2|intcomma }}</span>
+              {% else %}
+              <span class="text-danger fw-bold">-৳{{ txn.amount|floatformat:2|intcomma }}</span>
+              {% endif %}
+            </td>
+            <td><span class="badge-status badge-{{ txn.status|lower }}">{{ txn.status }}</span></td>
+            <td class="text-muted">{{ txn.created_at|date:"d M, H:i" }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="text-center py-5 text-muted">
+      <i class="fas fa-receipt fa-3x mb-3 opacity-25"></i>
+      <p>No transactions yet.</p>
+      <a href="{% url 'banking:deposit' %}" class="btn btn-primary-bank">Make First Deposit</a>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

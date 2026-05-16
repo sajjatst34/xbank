@@ -1,0 +1,52 @@
+{% extends 'banking/base.html' %}
+{% load humanize %}
+{% block title %}X Bank | Donation{% endblock %}
+{% block content %}
+<div class="container py-4"><div class="row justify-content-center"><div class="col-lg-7">
+<div class="card-bank">
+  <div class="card-header-bank"><i class="fas fa-heart fa-2x mb-2"></i><h3>Donate to a Cause</h3><p class="mb-0 opacity-75">Support what matters most</p></div>
+  <div class="p-4 p-md-5"><form method="post" novalidate>{% csrf_token %}
+    <div class="mb-4"><label class="form-label fw-semibold">From Account</label>
+      <div class="input-group-bank"><i class="fas fa-university input-icon"></i>
+        <select name="account" class="form-control form-control-bank" required>
+          {% for acc in form.account.field.queryset %}
+          <option value="{{ acc.pk }}">{{ acc.account_number }} — ৳{{ acc.balance|floatformat:2|intcomma }}</option>
+          {% empty %}<option value="">No active accounts</option>{% endfor %}
+        </select></div></div>
+    <div class="mb-4"><label class="form-label fw-semibold">Organization Name</label>
+      <div class="input-group-bank"><i class="fas fa-hands-helping input-icon"></i>
+        <input type="text" name="organization_name" class="form-control form-control-bank" placeholder="Name of organization or cause" required></div></div>
+    <div class="mb-4"><label class="form-label fw-semibold">Organization Type <span class="text-muted fw-normal">(optional)</span></label>
+      <div class="input-group-bank"><i class="fas fa-tag input-icon"></i>
+        <select name="organization_type" class="form-control form-control-bank">
+          <option value="">Select type</option>
+          <option value="NGO">NGO / Non-profit</option>
+          <option value="RELIGIOUS">Religious Organization</option>
+          <option value="EDUCATIONAL">Educational Institution</option>
+          <option value="HEALTHCARE">Healthcare</option>
+          <option value="DISASTER">Disaster Relief</option>
+          <option value="ANIMAL">Animal Welfare</option>
+          <option value="ENVIRONMENT">Environmental</option>
+          <option value="OTHER">Other</option>
+        </select></div></div>
+    <div class="mb-4"><label class="form-label fw-semibold">Donation Amount (BDT)</label>
+      <div class="input-group-bank"><i class="fas fa-coins input-icon"></i>
+        <input type="number" name="amount" id="amtInput" class="form-control form-control-bank" placeholder="Donation amount" min="10" step="0.01" required></div>
+      <div class="d-flex gap-2 mt-2 flex-wrap">
+        <button type="button" class="btn btn-sm btn-outline-danger qamt" data-a="100">৳100</button>
+        <button type="button" class="btn btn-sm btn-outline-danger qamt" data-a="500">৳500</button>
+        <button type="button" class="btn btn-sm btn-outline-danger qamt" data-a="1000">৳1,000</button>
+        <button type="button" class="btn btn-sm btn-outline-danger qamt" data-a="5000">৳5,000</button>
+      </div></div>
+    <div class="mb-4"><label class="form-label fw-semibold">Message <span class="text-muted fw-normal">(optional)</span></label>
+      <textarea name="message" class="form-control" rows="2" style="border-radius:1rem;" placeholder="A message with your donation..."></textarea></div>
+    <div class="form-check mb-4">
+      <input type="checkbox" name="is_anonymous" class="form-check-input" id="anonChk">
+      <label class="form-check-label" for="anonChk">Make this donation anonymous</label>
+    </div>
+    <div class="alert alert-warning rounded-3 mb-4"><i class="fas fa-shield-alt me-2"></i>OTP required to confirm donation.</div>
+    <button type="submit" class="btn btn-primary-bank w-100"><i class="fas fa-heart me-2"></i>Donate Now</button>
+  </form></div></div>
+</div></div></div>
+{% endblock %}
+{% block extra_js %}<script>document.querySelectorAll('.qamt').forEach(b=>b.addEventListener('click',function(){document.getElementById('amtInput').value=this.dataset.a;}));</script>{% endblock %}
