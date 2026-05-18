@@ -17,6 +17,7 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-xbank-secret')
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
 ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "*").split(",")
+
 CSRF_TRUSTED_ORIGINS = [
     "https://xbank-production-6ca3.up.railway.app",
 ]
