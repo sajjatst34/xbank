@@ -144,7 +144,7 @@ def get_totp_qr_base64(user, secret):
     uri = get_totp_uri(user, secret)
     img = qrcode.make(uri)
     buffer = io.BytesIO()
-    img.save(buffer, format='PNG')
+    img.save(buffer, format='PNG') # type: ignore
     buffer.seek(0)
     return base64.b64encode(buffer.read()).decode('utf-8')
 

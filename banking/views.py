@@ -179,7 +179,7 @@ def user_login(request):
             ip = get_client_ip(request)
 
             # Check if 2FA is enabled
-            if user.two_factor_enabled:
+            if user.two_factor_enabled: # type: ignore
                 # Store user in session, redirect to 2FA
                 request.session['2fa_user_pk'] = user.pk
                 request.session['2fa_ip'] = ip
@@ -190,8 +190,8 @@ def user_login(request):
             else:
                 # Direct login
                 login(request, user)
-                user.last_login_ip = ip
-                user.failed_login_attempts = 0
+                user.last_login_ip = ip # type: ignore
+                user.failed_login_attempts = 0 # type: ignore
                 user.save(update_fields=['last_login_ip', 'failed_login_attempts'])
                 request.session['last_activity'] = timezone.now().timestamp()
 
