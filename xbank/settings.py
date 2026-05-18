@@ -17,6 +17,9 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-xbank-secret')
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
 ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "*").split(",")
+CSRF_TRUSTED_ORIGINS = [
+    "https://xbank-production-6ca3.up.railway.app",
+]
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -119,6 +122,7 @@ SESSION_SAVE_EVERY_REQUEST = True
 CSRF_COOKIE_HTTPONLY = False
 CSRF_COOKIE_SECURE = False
 CSRF_COOKIE_SAMESITE = 'Lax'
+
 
 SECURE_CONTENT_TYPE_NOSNIFF = True
 X_FRAME_OPTIONS = 'DENY'
