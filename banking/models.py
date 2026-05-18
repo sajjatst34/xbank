@@ -40,7 +40,7 @@ class User(AbstractUser):
     ]
 
     # Personal info
-    phone = models.CharField(max_length=11, unique=True, null=True, blank=True)
+    phone = models.CharField(max_length=14, unique=True, null=True, blank=True)
     date_of_birth = models.DateField(null=True, blank=True)
     gender = models.CharField(max_length=1, choices=GENDER_CHOICES, blank=True)
     address = models.TextField(blank=True)
