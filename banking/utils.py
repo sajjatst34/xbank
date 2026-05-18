@@ -86,7 +86,7 @@ X Bank Security Team
         send_mail(
             subject=subject,
             message=message,
-            from_email=settings.DEFAULT_FROM_EMAIL,
+            from_email=getattr(settings, 'DEFAULT_FROM_EMAIL', 'jis.sajjat78@gmail.com'),
             recipient_list=[user.email],
             fail_silently=True,
         )
