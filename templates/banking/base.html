@@ -51,7 +51,7 @@
 <nav class="navbar navbar-expand-xl navbar-custom sticky-top">
   <div class="container-fluid">
     <a class="navbar-brand d-flex align-items-center gap-2" href="{% url 'banking:home' %}">
-      <img class="logo-img" src="static/images/logo.svg" alt="X Bank" onerror="this.style.display='none'">
+      <img class="logo-img" src="{% static 'images/logo.svg' %}" alt="X Bank" onerror="this.style.display='none'">
       <span class="bank-name">X Bank</span>
     </a>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" style="border-color:rgba(255,255,255,.5);">
