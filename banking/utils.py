@@ -88,7 +88,7 @@ X Bank Security Team
             message,
             settings.DEFAULT_FROM_EMAIL,
             [user.email],
-            fail_silently=True,
+            fail_silently=False,
 )
     except Exception as e:
         logger.error(f"Failed to send OTP email to {user.email}: {e}")
