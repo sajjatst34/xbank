@@ -135,7 +135,7 @@ AXES_LOCKOUT_TEMPLATE = 'banking/locked_out.html'
 AXES_LOCKOUT_PARAMETERS = ['username', 'ip_address']
 
 
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
