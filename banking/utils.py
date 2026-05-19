@@ -22,10 +22,52 @@ logger = logging.getLogger('banking')
 
 
 
+import random
 import requests
 from django.conf import settings
+from django.utils import timezone
+from datetime import timedelta
+
+from .models import OTP
 
 
+# ===============================
+# OTP GENERATOR
+# ===============================
+def generate_otp():
+    return str(random.randint(100000, 999999))
+
+
+# ===============================
+# MAIN OTP FUNCTION (USED BY VIEWS)
+# ===============================
+def send_otp(user, purpose, method="EMAIL"):
+    """
+    Called from views.py
+    """
+
+    otp_code = generate_otp()
+
+    # delete old OTP
+    OTP.objects.filter(user=user, purpose=purpose).delete()
+
+    # save OTP
+    OTP.objects.create(
+        user=user,
+        code=otp_code,
+        purpose=purpose,
+        expires_at=timezone.now() + timedelta(minutes=5),
+    )
+
+    if method == "EMAIL":
+        _send_otp_email(user, otp_code, purpose)
+
+    print(f"OTP sent to {user.username} for {purpose} via {method}")
+
+
+# ===============================
+# RESEND EMAIL SENDER
+# ===============================
 def _send_otp_email(user, otp_code, purpose):
 
     url = "https://api.resend.com/emails"
@@ -33,12 +75,12 @@ def _send_otp_email(user, otp_code, purpose):
     payload = {
         "from": settings.DEFAULT_FROM_EMAIL,
         "to": [user.email],
-        "subject": f"Your XBank OTP - {purpose}",
+        "subject": f"XBank OTP - {purpose}",
         "html": f"""
-            <h2>XBank OTP Verification</h2>
-            <p>Your OTP is:</p>
+            <h2>XBank Security Verification</h2>
+            <p>Your OTP code is:</p>
             <h1>{otp_code}</h1>
-            <p>This OTP expires in 5 minutes.</p>
+            <p>Valid for 5 minutes.</p>
         """,
     }
 
@@ -54,38 +96,6 @@ def _send_otp_email(user, otp_code, purpose):
 
     if response.status_code not in (200, 201):
         raise Exception("Resend email failed")
-
-# ─── TOTP (Google Authenticator style) ───────────────────────────────────────
-
-def generate_totp_secret():
-    """Generate a new TOTP secret for a user."""
-    return pyotp.random_base32()
-
-
-def get_totp_uri(user, secret):
-    """Get the URI to encode as QR code for Google Authenticator."""
-    issuer = getattr(settings, 'OTP_TOTP_ISSUER', 'X Bank')
-    totp = pyotp.TOTP(secret)
-    return totp.provisioning_uri(name=user.email, issuer_name=issuer)
-
-
-def get_totp_qr_base64(user, secret):
-    """Generate a base64-encoded QR code image for TOTP setup."""
-    uri = get_totp_uri(user, secret)
-    img = qrcode.make(uri)
-    buffer = io.BytesIO()
-    img.save(buffer, format='PNG') # type: ignore
-    buffer.seek(0)
-    return base64.b64encode(buffer.read()).decode('utf-8')
-
-
-def verify_totp(user, token):
-    """Verify a TOTP token against the user's secret."""
-    if not user.totp_secret:
-        return False
-    totp = pyotp.TOTP(user.totp_secret)
-    return totp.verify(token, valid_window=1)  # Allow 30s drift
-
 
 # ─── CARD UTILITIES ───────────────────────────────────────────────────────────
 
