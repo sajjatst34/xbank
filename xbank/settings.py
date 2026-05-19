@@ -4,6 +4,11 @@ Railway Deployment Ready
 """
 
 import os
+
+RESEND_API_KEY = os.environ.get("RESEND_API_KEY")
+
+DEFAULT_FROM_EMAIL = "onboarding@resend.dev"
+
 from pathlib import Path
 from datetime import timedelta
 from dotenv import load_dotenv
@@ -135,7 +140,7 @@ AXES_LOCKOUT_TEMPLATE = 'banking/locked_out.html'
 AXES_LOCKOUT_PARAMETERS = ['username', 'ip_address']
 
 
-
+"""
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 
 EMAIL_HOST = "smtp.gmail.com"
@@ -146,6 +151,7 @@ EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")
 
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+"""
 
 
 
