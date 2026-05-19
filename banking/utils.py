@@ -84,12 +84,12 @@ X Bank Security Team
 
     try:
         send_mail(
-            subject=subject,
-            message=message,
-            from_email=getattr(settings, 'DEFAULT_FROM_EMAIL', 'jis.sajjat78@gmail.com'),
-            recipient_list=[user.email],
-            fail_silently=False,
-        )
+            subject,
+            message,
+            settings.DEFAULT_FROM_EMAIL,
+            [user.email],
+            fail_silently=True,
+)
     except Exception as e:
         logger.error(f"Failed to send OTP email to {user.email}: {e}")
 
