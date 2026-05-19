@@ -88,7 +88,7 @@ X Bank Security Team
             message,
             settings.DEFAULT_FROM_EMAIL,
             [user.email],
-            fail_silently=False,
+            fail_silently=True,
 )
     except Exception as e:
         logger.error(f"Failed to send OTP email to {user.email}: {e}")
@@ -123,6 +123,85 @@ def verify_otp(user, otp_code, purpose):
         return otp_obj.verify(otp_code)
     except OTPVerification.DoesNotExist:
         return False
+
+
+# ─── TOTP (Google Authenticator style) ───────────────────────────────────────
+
+def generate_totp_secret():
+    """Generate a new TOTP secret for a user."""
+    return pyotp.random_base32()
+
+
+def get_totp_uri(user, secret):
+    """Get the URI to encode as QR code for Google Authenticator."""
+    issuer = getattr(settings, 'OTP_TOTP_ISSUER', 'X Bank')
+    totp = pyotp.TOTP(secret)
+    return totp.provisioning_uri(name=user.email, issuer_name=issuer)
+
+
+def get_totp_qr_base64(user, secret):
+    """Generate a base64-encoded QR code image for TOTP setup."""
+    uri = get_totp_uri(user, secret)
+    img = qrcode.make(uri)
+    buffer = io.BytesIO()
+    img.save(buffer, format='PNG') # type: ignore
+    buffer.seek(0)
+    return base64.b64encode(buffer.read()).decode('utf-8')
+
+
+def verify_totp(user, token):
+    """Verify a TOTP token against the user's secret."""
+    if not user.totp_secret:
+        return False
+    totp = pyotp.TOTP(user.totp_secret)
+    return totp.verify(token, valid_window=1)  # Allow 30s drift
+
+
+# ─── CARD UTILITIES ───────────────────────────────────────────────────────────
+
+def hash_cvv(cvv: str, card_number: str) -> str:
+    """Hash CVV with card number as salt (never store plain CVV)."""
+    salted = f"{card_number}:{cvv}:{settings.SECRET_KEY}"
+    return hashlib.sha256(salted.encode()).hexdigest()
+
+
+def verify_cvv(cvv: str, card_number: str, stored_hash: str) -> bool:
+    """Verify CVV against stored hash."""
+    return hash_cvv(cvv, card_number) == stored_hash
+
+
+def hash_pin(pin: str, account_number: str) -> str:
+    """Hash a card PIN."""
+    salted = f"{account_number}:{pin}:{settings.SECRET_KEY}"
+    return hashlib.sha256(salted.encode()).hexdigest()
+
+
+def luhn_check(card_number: str) -> bool:
+    """Validate card number using Luhn algorithm."""
+    digits = [int(d) for d in card_number.replace(' ', '') if d.isdigit()]
+    if len(digits) != 16:
+        return False
+    total = 0
+    for i, digit in enumerate(reversed(digits)):
+        if i % 2 == 1:
+            digit *= 2
+            if digit > 9:
+                digit -= 9
+        total += digit
+    return total % 10 == 0
+
+
+def detect_card_network(card_number: str) -> str:
+    """Detect card network from number prefix."""
+    n = card_number.replace(' ', '')
+    if n.startswith('4'):
+        return 'VISA'
+    elif n[:2] in ['51', '52', '53', '54', '55'] or (2221 <= int(n[:4]) <= 2720):
+        return 'MASTERCARD'
+    elif n[:2] in ['34', '37']:
+        return 'AMEX'
+    return 'UNKNOWN'
+
 
 # ─── TRANSACTION SECURITY ─────────────────────────────────────────────────────
 
